@@ -20,7 +20,7 @@ public class Persona implements Runnable {
 
             // Intercambia la ficha por el premio
             ficha = exchanger.exchange(ficha);
-            premio = exchanger.exchange(ficha);
+            premio = exchanger.exchange(null);
             System.out.println("Visitante: Recibí un " + premio);
         } catch (Exception e) {
             e.printStackTrace();

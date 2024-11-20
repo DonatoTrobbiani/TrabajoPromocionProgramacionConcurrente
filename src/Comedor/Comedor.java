@@ -23,6 +23,7 @@ public class Comedor {
             }
         } else {
             System.out.println("El comedor estaba lleno asi que "+ persona.getName() + " no entra al comedor y se va.");
+            persona.noEntro();
         }
     }
 
