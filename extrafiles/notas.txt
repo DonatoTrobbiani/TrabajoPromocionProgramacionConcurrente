@@ -1,0 +1,24 @@
+Recursos Compartidos:
+-Parque, 5 atracciones.
+
+Hilos:
+-GestorTiempo, lleva la hora.
+	Corre siempre, sumando hora.
+	A las 9, libera los permisos de los molinetes.
+	A las 18, toma control de todos los permisos de los molinetes.
+	A las 19, tiene que cerrar las atracciones (ver como prohibimos el paso a las atracciones, 
+	Personas proximas a querer entrar deberán elegir entre dar vueltas o salen del parque.)
+	A las 23, no tiene que quedar nadie en el parque (antes de esto vemos como avisamos a todos los asistentes),	
+-Persona, rompe las bolas.
+	Se queda bloqueada en un molinete hasta que abren el parque.
+	Trarará de concurrir a todas las atracciones.
+	Cuando están cerradas, decide dar vueltas o retirarse (Probablemene un random, para asegurar que eventualmente
+	se retiren todos antes de las 11 y nos evitamos un problema).
+
+
+PROBLEMAS:
+	Persona debe concurrir a todas las atracciones (4).
+	Mientras tanto, cómo se va a bloquear en caso de no poder acceder a ninguna? 
+	(conjunto de espera? semáforos? Esperará en el cjto. de espera de cada atracción?)
+	Cómo logramos que una persona se retire?
+
