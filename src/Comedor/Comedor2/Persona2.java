@@ -1,22 +1,20 @@
-package Comedor;
+package Comedor.Comedor2;
 
-public class Persona implements Runnable {
+public class Persona2 implements Runnable {
     private String nombre;
-    private Comedor comedor;
+    private Comedor2 comedor;
     private boolean entro = true;
 
-    public Persona(String nombre, Comedor comedor) {
+    public Persona2(String nombre, Comedor2 comedor) {
         this.nombre = nombre;
         this.comedor = comedor;
     }
-    
+
     public void run() {
         try {
-            comedor.entrarAComer(this);
-            if (entro) {
-                Thread.sleep(5000);
-                comedor.salirDelComedor(this);
-            }
+            comedor.entrarComedor();
+            Thread.sleep(1000);
+            System.out.println(Thread.currentThread().getName() + " salió del comedor.");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -13,10 +13,10 @@ public class EspacioVirtual {
 
     public synchronized void entrarVR(String nombre) {
         try {
-            
 
             if (cantVR < 1 || cantManoplas < 2 || cantBases < 1) {
-                System.out.println(nombre + " no puedo empezar la simulación ya que no hay equipos suficientes. Esperando...");
+                System.out.println(
+                        nombre + " no puedo empezar la simulación ya que no hay equipos suficientes. Esperando...");
                 wait();
             }
 
@@ -24,9 +24,8 @@ public class EspacioVirtual {
             cantBases--;
             cantManoplas--;
 
-
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
     }
 

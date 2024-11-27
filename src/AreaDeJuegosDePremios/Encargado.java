@@ -3,13 +3,11 @@ package AreaDeJuegosDePremios;
 import java.util.concurrent.Exchanger;
 
 public class Encargado implements Runnable {
-    private String nombre;
     private String fichaRecibida;
     private String premio;
-    private Exchanger <String> exchanger = new Exchanger<>();
+    private Exchanger<String> exchanger = new Exchanger<>();
 
-    public Encargado(String nombre, Exchanger<String> exchanger) {
-        this.nombre = nombre;
+    public Encargado(Exchanger<String> exchanger) {
         this.exchanger = exchanger;
     }
 
@@ -18,7 +16,7 @@ public class Encargado implements Runnable {
             // El encargado recibe la ficha
             fichaRecibida = exchanger.exchange(null);
             System.out.println("Encargado: Recibí una " + fichaRecibida);
-
+            // ! HACER SLEEP PARA SIMULAR JUEGO
             // Simular el cálculo de puntos en el juego
             int puntos = (int) (Math.random() * 100);
             System.out.println("Encargado: El jugador obtuvo " + puntos + " puntos");
@@ -38,5 +36,9 @@ public class Encargado implements Runnable {
         } catch (Exception e) {
             // TODO: handle exception
         }
+    }
+
+    public Exchanger<String> getExchanger() {
+        return exchanger;
     }
 }
