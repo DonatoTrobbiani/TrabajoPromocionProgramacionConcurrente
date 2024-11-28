@@ -25,14 +25,14 @@ public class Tren implements Runnable {
                 Persona primerPasajero = queue.poll(TIEMPO_ESPERA, TimeUnit.MILLISECONDS);
                 if (primerPasajero != null) {
                     pasajeros.add(primerPasajero);
-                    System.out.println(Thread.currentThread().getName() + " se subió al tren");
+                    System.out.println(primerPasajero.getNombre() + " se subió al tren");
                     while (System.currentTimeMillis() < tiempoDeSalida && pasajeros.size() < CAPACIDAD) {
                         Persona siguientePasajero = queue.poll(tiempoDeSalida - System.currentTimeMillis(),
                                 TimeUnit.MILLISECONDS);
                         if (siguientePasajero != null) {
                             pasajeros.add(siguientePasajero);
                             //! AGREGAR NOMBRE EN PERSONA PQ ESTO SE ROMPEEEE
-                            System.out.println(Thread.currentThread().getName() + " se subió al tren");
+                            System.out.println(siguientePasajero.getNombre() + " se subió al tren");
                         }
                     }
                 }

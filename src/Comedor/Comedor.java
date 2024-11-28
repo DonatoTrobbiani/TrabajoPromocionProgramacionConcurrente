@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import App.Persona;
+
 public class Comedor {
     private static final int CAPACIDAD_MESA = 4;
     private static final int CAPACIDAD_COMEDOR = 12;
@@ -21,23 +23,23 @@ public class Comedor {
         this.personasEnComedor = new AtomicInteger(0);
     }
 
-    public boolean entrarComedor() {
+    public boolean entrarComedor(Persona p) {
         boolean respuesta = true;
         // ! Podemos hacer clase mesa para denotar en cuál mesa se sientan las personas.
         if (personasEnComedor.incrementAndGet() > CAPACIDAD_COMEDOR) {
-            System.out.println(Thread.currentThread().getName() + " no retiró al comedor, está lleno.");
+            System.out.println(p.getNombre() + " no retiró al comedor, está lleno.");
             personasEnComedor.decrementAndGet();
         } else {
-            System.out.println(Thread.currentThread().getName() + " entró al comedor");
+            System.out.println(p.getNombre() + " entró al comedor");
             try {
-                System.out.println(Thread.currentThread().getName() + " se sentó en la mesa.");
+                System.out.println(p.getNombre() + " se sentó en la mesa.");
 
                 if (personasEnMesa.incrementAndGet() == CAPACIDAD_MESA) {
                     personasEnMesa.set(0);
                 }
                 barreraMesa.await(5, TimeUnit.SECONDS);
             } catch (TimeoutException | BrokenBarrierException e) {
-                System.out.println(Thread.currentThread().getName() + " se retiró del comedor, se cansó de esperar.");
+                System.out.println(p.getNombre() + " se retiró del comedor, se cansó de esperar.");
                 respuesta = false;
             } catch (Exception e) {
                 e.printStackTrace();

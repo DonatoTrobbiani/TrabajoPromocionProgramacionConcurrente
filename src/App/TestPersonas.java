@@ -13,12 +13,19 @@ import TrenesDelParque.Tren;
 public class TestPersonas {
     public static void main(String[] args) {
         GestorTiempo gestorTiempo = new GestorTiempo(null);
-        EspacioVirtual espacioVirtual = new EspacioVirtual(2, 2, 2);
+        int cantRecursos = 5;
+        EspacioVirtual espacioVirtual = new EspacioVirtual(cantRecursos,cantRecursos*2,cantRecursos, gestorTiempo);
         Comedor comedor = new Comedor();
-        Exchanger<String> exchanger = new Exchanger<>();
-        Encargado encargado = new Encargado(exchanger);
-        Thread hiloEncargado = new Thread(encargado);
-        hiloEncargado.start();
+
+        int cantEncargados = 3;
+        Thread[] hilosEncargados = new Thread[cantEncargados];
+        Encargado[] encargado = new Encargado[cantEncargados];
+        for (int i = 0; i < cantEncargados; i++) {
+            Exchanger<String> exchanger = new Exchanger<>();
+            encargado[i] = new Encargado(exchanger);
+            hilosEncargados[i] = new Thread(encargado[i], "Encargado " + i);
+            hilosEncargados[i].start();
+        }
 
         BlockingQueue<Persona> queue = new ArrayBlockingQueue<>(10);
         Tren tren = new Tren(queue);
@@ -34,7 +41,7 @@ public class TestPersonas {
         Thread[] hilos = new Thread[cantPersonas];
 
         for (int i = 0; i < cantPersonas; i++) {
-            hilos[i] = new Thread(new Persona(parque, i), "Persona " + i);
+            hilos[i] = new Thread(new Persona(parque, "Persona " + i), "Persona " + i);
             hilos[i].start();
         }
 

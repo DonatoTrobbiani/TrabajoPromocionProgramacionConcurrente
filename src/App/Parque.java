@@ -15,14 +15,15 @@ public class Parque {
     // podemos agregar un semaforo mutex para chequear la disponibilidad del parque.
     private final int cantMolinetes;
     private final GestorTiempo gestorTiempo;
-    private final Encargado encargado;
+    private final Encargado[] encargado;
     private final EspacioVirtual espacioVirtual;
     private final Comedor comedor;
     private final Tren trencito;
 
     private final Semaphore semaforoMolinetes;
+    private final Semaphore mutex = new Semaphore(1);
 
-    public Parque(int cantMolinetes, GestorTiempo gestorTiempo, Encargado encargado, EspacioVirtual ev,
+    public Parque(int cantMolinetes, GestorTiempo gestorTiempo, Encargado[] encargado, EspacioVirtual ev,
             Comedor comedor, Tren trencito) {
         this.cantMolinetes = cantMolinetes;
         this.semaforoMolinetes = new Semaphore(0);// empieza en 0 para que no se pueda entrar al parque hasta que
@@ -56,32 +57,44 @@ public class Parque {
 
     public boolean areaDeJuegos(Persona p) throws InterruptedException {
         boolean res = true;
-        Exchanger<String> exchanger = encargado.getExchanger();
+        Encargado encargadoDisponible = encargadoLibre();
+        Exchanger<String> exchanger = encargadoDisponible.getExchanger();
         String ficha = "Ficha";
 
+        mutex.acquire();
         // El visitante da una ficha
-        System.out.println("Visitante: Entrego una " + ficha);
+        System.out.println(p.getNombre() + " entregó una " + ficha);
         // Intercambia la ficha por el premio
         ficha = exchanger.exchange(ficha);
         p.setPremio(exchanger.exchange(null));
-        System.out.println("Visitante: Recibí un " + p.getPremio());
+        System.out.println(p.getNombre() + " recibí un " + p.getPremio());
+        mutex.release();
         return res;
     }
 
-    public boolean entrarRealidadVirtual() throws InterruptedException {
-        boolean res = true;
-        espacioVirtual.entrarVR(Thread.currentThread().getName());
-        return res;
+    private Encargado encargadoLibre() {
+        Encargado encargadoLibre = null;
+        for (Encargado encargado : this.encargado) {
+            if (!encargado.isOcupado()) {
+                encargadoLibre = encargado;
+            }
+        }
+        if (encargadoLibre == null) {
+            encargadoLibre = encargado[(int) Math.random() * 3];
+        }
+        return encargadoLibre;
     }
 
-    public boolean salirRealidadVirtual() throws InterruptedException {
-        boolean res = true;
+    public boolean entrarRealidadVirtual(Persona p) throws InterruptedException {
+        return espacioVirtual.entrarVR(p);
+    }
+
+    public void salirRealidadVirtual() throws InterruptedException {
         espacioVirtual.salirVR();
-        return res;
     }
 
-    public boolean entrarAreaComedor() throws InterruptedException {
-        return comedor.entrarComedor();
+    public boolean entrarAreaComedor(Persona p) throws InterruptedException {
+        return comedor.entrarComedor(p);
     }
 
     public BlockingQueue<Persona> getQueue() {
@@ -92,11 +105,11 @@ public class Parque {
         boolean respuesta = false;
         BlockingQueue<Persona> queue = this.getQueue();
         if (queue.offer(p, 2, TimeUnit.SECONDS)) {
-            System.out.println("Persona " + Thread.currentThread().getName() +
+            System.out.println(p.getNombre() +
                     " entró a la cola para subirse al tren");
             respuesta = true;
         } else {
-            System.out.println("Persona " + Thread.currentThread().getName() +
+            System.out.println(p.getNombre() +
                     " vio que la cola para el tren estaba llena y se fue");
         }
         return respuesta;
