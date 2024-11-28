@@ -1,59 +1,50 @@
 package Comedor;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Comedor {
-    private int cantMesas;
-    private CyclicBarrier[] mesas;
-    private AtomicInteger cantPersonas = new AtomicInteger(0);
+    private static final int CAPACIDAD_MESA = 4;
+    private static final int CAPACIDAD_COMEDOR = 12;
+    private final CyclicBarrier barreraMesa;
+    private final AtomicInteger personasEnMesa;
+    private final AtomicInteger personasEnComedor;
 
-    public Comedor(int cantMesas) {
-        this.cantMesas = cantMesas;
-        this.mesas = new CyclicBarrier[cantMesas];
-        for (int i = 0; i < cantMesas; i++) {
-            mesas[i] = new CyclicBarrier(4);
-        }
+    public Comedor() {
+        this.barreraMesa = new CyclicBarrier(CAPACIDAD_MESA, () -> {
+            System.out.println("La mesa está llena. Comiendo...");
+        });
+        this.personasEnMesa = new AtomicInteger(0);
+        this.personasEnComedor = new AtomicInteger(0);
     }
 
-    public void entrarAComer(Persona persona) {
-        if (cantPersonas.get() < cantMesas * 4) {
-            int mesaDisponible = obtenerMesaDisponible();
-            if (mesaDisponible != -1) {
-                try {
-                    System.out.println(persona.getName() + " entró al comedor y se sienta en una mesa.");
-                    cantPersonas.incrementAndGet();
-                    mesas[mesaDisponible].await();
-                    System.out.println(persona.getName() + " empieza a comer.");
-                } catch (Exception e) {
-                    // TODO: handle exception
-                }
-            } else {
-                System.out.println("No hay mesas disponibles para " + persona.getName());
-                persona.noEntro();
-            }
+    public boolean entrarComedor() {
+        boolean respuesta = true;
+        // ! Podemos hacer clase mesa para denotar en cuál mesa se sientan las personas.
+        if (personasEnComedor.incrementAndGet() > CAPACIDAD_COMEDOR) {
+            System.out.println(Thread.currentThread().getName() + " no retiró al comedor, está lleno.");
+            personasEnComedor.decrementAndGet();
         } else {
-            System.out.println("El comedor estaba lleno asi que " + persona.getName() + " no entra al comedor y se va.");
-            persona.noEntro();
-        }
-    }
+            System.out.println(Thread.currentThread().getName() + " entró al comedor");
+            try {
+                System.out.println(Thread.currentThread().getName() + " se sentó en la mesa.");
 
-    public void salirDelComedor(Persona persona) {
-        try {
-            cantPersonas.decrementAndGet();
-            System.out.println(persona.getName() + " terminó de comer y se va del comedor.");
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
-
-    public int obtenerMesaDisponible() {
-        int mesa = -1;
-        for (int i = 0; i < cantMesas; i++) {
-            if (mesas[i].getNumberWaiting() < 4) {
-                mesa = i;
+                if (personasEnMesa.incrementAndGet() == CAPACIDAD_MESA) {
+                    personasEnMesa.set(0);
+                }
+                barreraMesa.await(5, TimeUnit.SECONDS);
+            } catch (TimeoutException | BrokenBarrierException e) {
+                System.out.println(Thread.currentThread().getName() + " se retiró del comedor, se cansó de esperar.");
+                respuesta = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                personasEnComedor.decrementAndGet();
             }
         }
-        return mesa;
+        return respuesta;
     }
 }

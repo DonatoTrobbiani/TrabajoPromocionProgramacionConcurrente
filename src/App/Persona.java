@@ -34,29 +34,37 @@ public class Persona implements Runnable {
 
             // 2. Mientras esté en horario habilitado y queden atracciones por visitar:
             int atraccionAnterior = -1;
-            while (parque.estaAbiertoParque() && !atracciones.isEmpty()) {
-                int atraccionActual;
+            boolean salida = false;
+            while (!salida && parque.estaAbiertoParque() && !atracciones.isEmpty()) {
+                if (parque.puedeUsarActividades()) {
+                    int atraccionActual;
 
-                // Asegura no repetir actividades
-                do {
-                    atraccionActual = (int) (Math.random() * atracciones.size());
-                } while (atraccionActual == atraccionAnterior);
+                    // Asegura no repetir actividades
+                    do {
+                        atraccionActual = (int) (Math.random() * atracciones.size());
+                    } while (atraccionActual == atraccionAnterior);
 
-                // Intenta realizar la actividad
-                boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
+                    // Intenta realizar la actividad
+                    boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
 
-                // Si fue exitoso, quita la actividad de la lista
-                if (exito) {
-                    System.out.println("Persona " + id + " completó la atracción: " + atracciones.get(atraccionActual));
-                    atracciones.remove(atraccionActual);
+                    // Si fue exitoso, quita la actividad de la lista
+                    if (exito) {
+                        System.out.println(
+                                "Persona " + id + " completó la atracción: " + atracciones.get(atraccionActual));
+                        atracciones.remove(atraccionActual);
+                    } else {
+                        // Si no fue exitoso, vuelve a intentar
+                        System.out.println(
+                                "Persona " + id + " no pudo completar la atracción: "
+                                        + atracciones.get(atraccionActual));
+                        atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
+                    }
+                    // Sleep para testear si sigue cuando se cierra el parque
+                    Thread.sleep(10000);
                 } else {
-                    // Si no fue exitoso, vuelve a intentar
-                    System.out.println(
-                            "Persona " + id + " no pudo completar la atracción: " + atracciones.get(atraccionActual));
-                    atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
+                    System.out.println("Persona " + id + " no puede realizar actividades, el parque está cerrado.");
+                    salida = true;
                 }
-                // Sleep para testear si sigue cuando se cierra el parque
-                Thread.sleep(10000);
             }
             // 3. Si completa todas las atracciones o se acaba el horario, sale del parque
             System.out.println("Persona " + id + " sale del parque");
@@ -77,10 +85,10 @@ public class Persona implements Runnable {
         boolean res = false;
         switch (atraccion) {
             case "Comedor":
-
+                res = this.areaComedor();
                 break;
             case "Trenes":
-
+                res = this.entrarAreaTrenes();
                 break;
             case "Realidad Virtual":
                 res = this.jugarRealidadVirtual();
@@ -95,14 +103,30 @@ public class Persona implements Runnable {
     }
 
     private boolean jugarRealidadVirtual() throws InterruptedException {
-        // ! Si son las 19 no se puede jugar
+        // ! respuesta (unificarla)
+        boolean respuesta = false;
         System.out.println(Thread.currentThread().getName() + " quiere pobrar la realidad virtual.");
-        boolean respuesta = parque.entrarRealidadVirtual();
+        respuesta = parque.entrarRealidadVirtual();
         System.out.println(Thread.currentThread().getName() + " comienza la simulación.");
         Thread.sleep((int) Math.random() * 2000);
         System.out.println(Thread.currentThread().getName() + " terminó la simulación.");
         respuesta = respuesta && parque.salirRealidadVirtual();
         System.out.println(Thread.currentThread().getName() + " abandona la atracción de realidad virtual.");
+
         return respuesta;
+    }
+
+    private boolean areaComedor() throws InterruptedException {
+        boolean respuesta = parque.entrarAreaComedor();
+        if (respuesta) {
+            System.out.println(Thread.currentThread().getName() + " está comiendo.");
+            Thread.sleep((int) Math.random() * 2000);
+            System.out.println(Thread.currentThread().getName() + " terminó de comer.");
+        }
+        return respuesta;
+    }
+
+    private boolean entrarAreaTrenes() throws InterruptedException {
+        return parque.entrarAreaTrenes(this);
     }
 }

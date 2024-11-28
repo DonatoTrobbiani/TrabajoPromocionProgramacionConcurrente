@@ -5,13 +5,15 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import App.Persona;
+
 public class Tren implements Runnable {
     private final BlockingQueue<Persona> queue;
     private static final int CAPACIDAD = 10;
     private static final long TIEMPO_ESPERA = 10000;
 
     public Tren(BlockingQueue<Persona> queue) {
-        this. queue = queue;
+        this.queue = queue;
     }
 
     @Override
@@ -23,12 +25,14 @@ public class Tren implements Runnable {
                 Persona primerPasajero = queue.poll(TIEMPO_ESPERA, TimeUnit.MILLISECONDS);
                 if (primerPasajero != null) {
                     pasajeros.add(primerPasajero);
-                    System.out.println(primerPasajero.getName() + " se subió al tren");
+                    System.out.println(Thread.currentThread().getName() + " se subió al tren");
                     while (System.currentTimeMillis() < tiempoDeSalida && pasajeros.size() < CAPACIDAD) {
-                        Persona siguientePasajero = queue.poll(tiempoDeSalida - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+                        Persona siguientePasajero = queue.poll(tiempoDeSalida - System.currentTimeMillis(),
+                                TimeUnit.MILLISECONDS);
                         if (siguientePasajero != null) {
                             pasajeros.add(siguientePasajero);
-                            System.out.println(siguientePasajero.getName() + " se subió al tren");
+                            //! AGREGAR NOMBRE EN PERSONA PQ ESTO SE ROMPEEEE
+                            System.out.println(Thread.currentThread().getName() + " se subió al tren");
                         }
                     }
                 }
@@ -40,6 +44,10 @@ public class Tren implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    public BlockingQueue<Persona> getQueue() {
+        return queue;
     }
 
     private void salirTren(List<Persona> pasajeros) throws InterruptedException {

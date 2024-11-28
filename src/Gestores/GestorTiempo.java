@@ -30,7 +30,7 @@ public class GestorTiempo implements Runnable {
     public void run() {
         try {
             while (true) {
-                Thread.sleep(10);
+                Thread.sleep(200);
                 minutos.incrementAndGet();
                 if (minutos.get() == 60) {
                     hora.incrementAndGet();
