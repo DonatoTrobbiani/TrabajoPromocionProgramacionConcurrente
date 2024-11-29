@@ -89,8 +89,8 @@ public class Parque {
         return espacioVirtual.entrarVR(p);
     }
 
-    public void salirRealidadVirtual() throws InterruptedException {
-        espacioVirtual.salirVR();
+    public void salirRealidadVirtual(Persona p) throws InterruptedException {
+        espacioVirtual.salirVR(p);
     }
 
     public boolean entrarAreaComedor(Persona p) throws InterruptedException {
@@ -115,7 +115,7 @@ public class Parque {
         return respuesta;
     }
 
-    public boolean puedeUsarActividades() {
+    public boolean estanAbiertasAtracciones() {
         return gestorTiempo.getHora() <= 19;
     }
 }

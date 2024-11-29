@@ -8,10 +8,11 @@ public class GestorTiempo implements Runnable {
     private AtomicInteger hora;
     private AtomicInteger minutos;
     private Parque parque;
+    // ? puede mejorar con atomic boolean
 
     public GestorTiempo(Parque parque) {
         this.hora = new AtomicInteger(8);
-        this.minutos = new AtomicInteger(0);
+        this.minutos = new AtomicInteger(50);
         this.parque = parque;
     }
 
@@ -21,16 +22,14 @@ public class GestorTiempo implements Runnable {
      * El complejo se encuentra abierto para el ingreso de 09:00 a 18:00hs.
      * Considere que las actividades cierran a las 19.00 hrs. Y a las 23hs no
      * debería quedar nadie en el parque.
-     * 
-     * Hay que resolver el cuello de los k molinetes, con semaforos entra, toma su
-     * tiempo y libera su permiso.
      */
 
     @Override
     public void run() {
         try {
             while (true) {
-                Thread.sleep(200);
+                Thread.sleep(500); // 1 segundo IRL, 2 minutos en el programa;
+                // Una hora en el programa es 30 segundos IRL.
                 minutos.incrementAndGet();
                 if (minutos.get() == 60) {
                     hora.incrementAndGet();
@@ -42,26 +41,20 @@ public class GestorTiempo implements Runnable {
                 if (hora.get() == 9 && minutos.get() == 0) {
                     // Abre el parque
                     this.abrirParque();
-                    System.out.println("Permisos molinetes abrir: " + parque.getSemaforoMolinetes().availablePermits());
                 }
                 if (hora.get() == 18 && minutos.get() == 0) {
                     // Cierra el parque
-                    System.out.println("Cerrando el parque...");
                     this.cerrarParque();
-                    System.out
-                            .println("Permisos molinetes cerrar: " + parque.getSemaforoMolinetes().availablePermits());
                 }
                 if (hora.get() == 19 && minutos.get() == 0) {
                     // Cierra las atracciones
-                    System.out.println("Cerrando las atracciones");
-                    // this.cerrarAtracciones();
+                    System.out.println(
+                            "[GestorTiempo] Las atracciones han cerrado.");
                 }
                 if (hora.get() == 23 && minutos.get() == 0) {
-                    // No debería quedar nadie en el parque
-                    System.out.println("El parque está vacío");
-                    // this.vaciarParque();
+                    System.out.println("[GestorTiempo] El parque ha cerrado, todos los visitantes deben retirarse.");
                 }
-                System.out.println("Hora: " + hora + ":" + minutos);
+                // System.out.println(hora + ":" + minutos);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -69,12 +62,12 @@ public class GestorTiempo implements Runnable {
     }
 
     private void abrirParque() {
-        System.out.println("Abriendo el parque");
+        System.out.println("[GestorTiempo] Abriendo el parque");
         parque.getSemaforoMolinetes().release(parque.getCantMolinetes());
     }
 
     private void cerrarParque() throws InterruptedException {
-        System.out.println("Cerrando el parque");
+        System.out.println("[GestorTiempo] Cerrando el parque");
         parque.getSemaforoMolinetes().acquire(parque.getCantMolinetes());
     }
 

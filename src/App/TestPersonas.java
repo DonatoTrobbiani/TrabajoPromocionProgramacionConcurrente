@@ -13,7 +13,7 @@ import TrenesDelParque.Tren;
 public class TestPersonas {
     public static void main(String[] args) {
         GestorTiempo gestorTiempo = new GestorTiempo(null);
-        int cantRecursos = 5;
+        int cantRecursos = 1;
         EspacioVirtual espacioVirtual = new EspacioVirtual(cantRecursos,cantRecursos*2,cantRecursos, gestorTiempo);
         Comedor comedor = new Comedor();
 
@@ -31,13 +31,13 @@ public class TestPersonas {
         Tren tren = new Tren(queue);
         Thread hiloTren = new Thread(tren);
         hiloTren.start();
-        Parque parque = new Parque(1, gestorTiempo, encargado, espacioVirtual, comedor, tren);
+        Parque parque = new Parque(3, gestorTiempo, encargado, espacioVirtual, comedor, tren);
         gestorTiempo.setParque(parque);
         Thread hiloGestorTiempo = new Thread(gestorTiempo);
 
         hiloGestorTiempo.start();
 
-        int cantPersonas = 20;
+        int cantPersonas = 15;
         Thread[] hilos = new Thread[cantPersonas];
 
         for (int i = 0; i < cantPersonas; i++) {
@@ -49,7 +49,7 @@ public class TestPersonas {
             for (Thread thread : hilos) {
                 thread.join();
             }
-            hiloGestorTiempo.interrupt();
+            System.out.println("Simulación terminada.");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

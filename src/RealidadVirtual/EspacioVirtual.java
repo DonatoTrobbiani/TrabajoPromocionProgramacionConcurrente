@@ -21,17 +21,18 @@ public class EspacioVirtual {
         try {
             while (actividadValida) {
                 if (gestorTiempo.getHora() >= 19) {
-                    System.out.println(p.getNombre() + " no puede entrar a la Realidad Virtual porque ya es tarde.");
+                    System.out.println(
+                            "[VR] " + p.getNombre() + " no puede entrar a la Realidad Virtual porque ya es tarde.");
                     actividadValida = false;
                 } else if (cantVR < 1 || cantManoplas < 2 || cantBases < 1) {
-                    System.out.println(p.getNombre()
-                            + " no puede entrar a la Realidad Virtual porque no hay suficientes recursos.");
+                    System.out.println("[VR] " + p.getNombre()
+                            + " debe esperar en el espacio virtual, no hay equipos suficientes.");
                     wait();
                 } else {
                     cantVR--;
                     cantManoplas -= 2;
                     cantBases--;
-                    System.out.println(p.getNombre() + " entró a la Realidad Virtual");
+                    System.out.println("[VR] " + p.getNombre() + " entró a la Realidad Virtual");
                     puedeEntrar = true;
                     actividadValida = false;
                 }
@@ -42,10 +43,11 @@ public class EspacioVirtual {
         return puedeEntrar;
     }
 
-    public synchronized void salirVR() {
+    public synchronized void salirVR(Persona p) {
         cantVR++;
         cantBases++;
-        cantManoplas+=2;
-        notifyAll();
+        cantManoplas += 2;
+        System.out.println("[VR] " + p.getNombre() + " salió de la Realidad Virtual.");
+        notify();
     }
 }

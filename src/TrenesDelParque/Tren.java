@@ -31,7 +31,6 @@ public class Tren implements Runnable {
                                 TimeUnit.MILLISECONDS);
                         if (siguientePasajero != null) {
                             pasajeros.add(siguientePasajero);
-                            //! AGREGAR NOMBRE EN PERSONA PQ ESTO SE ROMPEEEE
                             System.out.println(siguientePasajero.getNombre() + " se subió al tren");
                         }
                     }

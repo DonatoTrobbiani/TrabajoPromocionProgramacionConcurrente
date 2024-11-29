@@ -11,8 +11,6 @@ public class Encargado implements Runnable {
     public Encargado(Exchanger<String> exchanger) {
         this.exchanger = exchanger;
     }
-
-    // ! son mas de un encargado
     public void run() {
         try {
             while (true) {
@@ -40,7 +38,7 @@ public class Encargado implements Runnable {
                 cambiarEstado();
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e.getMessage());
         }
     }
 
