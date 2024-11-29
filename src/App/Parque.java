@@ -106,17 +106,7 @@ public class Parque {
     }
 
     public boolean entrarAreaTrenes(Persona p) throws InterruptedException {
-        boolean respuesta = false;
-        BlockingQueue<Persona> queue = this.getQueue();
-        if (queue.offer(p, 2, TimeUnit.SECONDS)) {
-            System.out.println(p.getNombre() +
-                    " entró a la cola para subirse al tren");
-            respuesta = true;
-        } else {
-            System.out.println(p.getNombre() +
-                    " vio que la cola para el tren estaba llena y se fue");
-        }
-        return respuesta;
+        return trencito.subirTren(p);
     }
 
     public boolean estanAbiertasAtracciones() {

@@ -126,7 +126,11 @@ public class Persona implements Runnable {
     }
 
     private boolean entrarAreaTrenes() throws InterruptedException {
-        return parque.entrarAreaTrenes(this);
+        boolean res = parque.entrarAreaTrenes(this);
+        if (res) {
+            System.out.println("[TR] " + nombre + " se bajó del tren.--------------");
+        }
+        return res;
     }
 
     public String getNombre() {
