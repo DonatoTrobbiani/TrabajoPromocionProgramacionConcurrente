@@ -2,21 +2,29 @@ package TrenesDelParque;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import App.Persona;
 
-public class Tren implements Runnable {
-    private final BlockingQueue<Persona> queue;
+public class Tren {
+    private final BlockingQueue<Persona> queue = new ArrayBlockingQueue<>(CAPACIDAD);
     private static final int CAPACIDAD = 10;
     private static final long TIEMPO_ESPERA = 10000;
 
-    public Tren(BlockingQueue<Persona> queue) {
-        this.queue = queue;
+    public synchronized void partirTren() {
+        
     }
-
-    @Override
+    
+    
+    
+    
+    public BlockingQueue<Persona> getQueue() {
+        return queue;
+    }
+    
+    /*@Override
     public void run() {
         while (true) {
             long tiempoDeSalida = System.currentTimeMillis() + TIEMPO_ESPERA;
@@ -43,13 +51,9 @@ public class Tren implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
-    public BlockingQueue<Persona> getQueue() {
-        return queue;
-    }
-
-    private void salirTren(List<Persona> pasajeros) throws InterruptedException {
+    /*private void salirTren(List<Persona> pasajeros) throws InterruptedException {
         Thread.sleep(10000);
-    }
+    }*/
 }

@@ -56,11 +56,10 @@ public class Parque {
     }
 
     public boolean areaDeJuegos(Persona p) throws InterruptedException {
-        boolean res = true;
+        boolean respuesta = true;
         Encargado encargadoDisponible = encargadoLibre();
         Exchanger<String> exchanger = encargadoDisponible.getExchanger();
         String ficha = "Ficha";
-
         mutex.acquire();
         // El visitante da una ficha
         System.out.println(p.getNombre() + " entregó una " + ficha);
@@ -69,20 +68,25 @@ public class Parque {
         p.setPremio(exchanger.exchange(null));
         System.out.println(p.getNombre() + " recibí un " + p.getPremio());
         mutex.release();
-        return res;
+        return respuesta;
     }
 
+    /**
+     * Devuelve un encargado libre, si
+     * no hay ninguno devuelve uno al azar.
+     * 
+     * @return Encargado si hay uno libre, sino devuelve uno al azar.
+     */
+
     private Encargado encargadoLibre() {
-        Encargado encargadoLibre = null;
-        for (Encargado encargado : this.encargado) {
-            if (!encargado.isOcupado()) {
-                encargadoLibre = encargado;
-            }
+        int i = 0;
+        // Busca un encargado libre
+        while (i < encargado.length && encargado[i].isOcupado()) {
+            i++;
         }
-        if (encargadoLibre == null) {
-            encargadoLibre = encargado[(int) Math.random() * 3];
-        }
-        return encargadoLibre;
+        // Si está dentro del rango de encargados, lo devuelve
+        // sino devuelve uno al azar.
+        return i < encargado.length ? encargado[i] : encargado[(int) (Math.random() * encargado.length)];
     }
 
     public boolean entrarRealidadVirtual(Persona p) throws InterruptedException {
