@@ -21,7 +21,7 @@ public class Conductor implements Runnable {
                 System.out.println("[TR_C]: Esperando pasajeros");
                 colaPasajeros.take(); // se bloquea hasta que haya un pasajero
                 // espera 5 minutos o 10 pasajeros
-                long tiempoDeEspera = System.currentTimeMillis() + 60000;
+                long tiempoDeEspera = System.currentTimeMillis() + 10000;
                 int cantidadDePasajeros = 0;
                 while (System.currentTimeMillis() < tiempoDeEspera && cantidadDePasajeros < 9) {
                     if (colaPasajeros.size() > 0) {

@@ -39,6 +39,7 @@ public class Comedor {
         if (personasEnComedor.incrementAndGet() > CAPACIDAD_COMEDOR) {
             System.out.println(p.getNombre() + " no retiró al comedor, está lleno.");
             personasEnComedor.decrementAndGet();
+            respuesta = false;
         } else {
             System.out.println(p.getNombre() + " entró al comedor");
             try {
@@ -47,15 +48,32 @@ public class Comedor {
                 mesa.agregarPersona(p.getNombre());
                 System.out.println(p.getNombre() + " se sentó en la mesa " + mesa.getNumero());
                 barreraMesa.await(15000, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException | BrokenBarrierException e) {
+            } catch (TimeoutException e) {
                 System.out.println(p.getNombre() + " se retiró del comedor, se cansó de esperar.");
                 respuesta = false;
+                resetearBarrera(); // reiniciar la barrera para prevenir bloqueos
+                // ! Si se resetea la barrera, se pierde la sincronización de las mesas xd.
+            } catch (BrokenBarrierException e) {
+                System.out.println(p.getNombre() + " se retiró del comedor, ocurrió un error en su mesa.");
+                //System.out.println("Error en la barrera al usar la mesa: " + e.getMessage());
+                respuesta = false;
+                resetearBarrera();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 personasEnComedor.decrementAndGet();
+                int mesaIndex = (mesaActual.get()) % mesas.size();
+                Mesa mesa = mesas.get(mesaIndex);
+                mesa.quitarPersona(p.getNombre());
             }
         }
         return respuesta;
+    }
+
+    private void resetearBarrera() {
+        barreraMesa.reset();
+        int mesaIndex = mesaActual.get() % mesas.size();
+        Mesa mesa = mesas.get(mesaIndex);
+        mesa.limpiarMesa();
     }
 }

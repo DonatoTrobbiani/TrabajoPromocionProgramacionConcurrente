@@ -24,6 +24,10 @@ public class Mesa {
         personas.add(nombrePersona);
     }
 
+    public void quitarPersona(String nombrePersona) {
+        personas.remove(nombrePersona);
+    }
+
     public void limpiarMesa() {
         personas.clear();
     }

@@ -39,22 +39,24 @@ public class Persona implements Runnable {
             boolean salida = false;
             while (!salida && parque.estaAbiertoParque() && !atracciones.isEmpty()) {
                 // Simula el tiempo que tarda en dar una vuelta por el parque
-                System.out.println("[PE] " + nombre + " está paseando por el parque.");
+                // ! AGREGAR SHOPPING, DAR VUELTAS INDEFINIDAMENTE CON PROBABILIDAD DE SALIR (SI
+                // ! ES ANTES DE LAS 23 CLARO).
+                System.out.println("[PE] " + nombre + " está paseando por el parque.\n Actividades Pendientes: "
+                        + atracciones.toString());
                 Thread.sleep((int) (Math.random() * 3000 + 3000));
                 if (parque.estanAbiertasAtracciones()) {
                     // Asegura no repetir actividades
                     int atraccionActual;
                     do {
                         atraccionActual = (int) (Math.random() * atracciones.size());
-                    } while (atraccionActual == atraccionAnterior);
+                    } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
                     // Intenta realizar la actividad
                     boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
                     // Si fue exitoso, quita la actividad de la lista
                     if (exito) {
                         atracciones.remove(atraccionActual);
-                    } else {
-                        atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
                     }
+                    atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
                 } else {
                     System.out.println("[PE] " + nombre + " no puede realizar actividades, el parque está cerrado.");
                     salida = true;
@@ -79,20 +81,24 @@ public class Persona implements Runnable {
         boolean res = false;
         switch (atraccion) {
             case "Comedor":
+                Thread.sleep(10000);
                 res = true;
                 // res = this.entrarAreaComedor();
                 break;
             case "Trenes":
+                Thread.sleep(10000);
                 res = true;
-                res = this.entrarAreaTrenes();
+                // res = this.entrarAreaTrenes();
                 break;
             case "Realidad Virtual":
+                // Thread.sleep(10000);
                 res = true;
-                // res = this.entrarAreaVR();
+                res = this.entrarAreaVR();
                 break;
             case "Area de Premios":
-                res = true;
                 // ? Cambiar carteles si es posible
+                Thread.sleep(10000);
+                res = true;
                 // res = parque.areaDeJuegos(this);
                 break;
             default:

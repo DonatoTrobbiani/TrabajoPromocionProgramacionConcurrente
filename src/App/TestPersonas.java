@@ -28,9 +28,8 @@ public class TestPersonas {
             hilosEncargados[i].start();
         }
 
-        BlockingQueue<Persona> queue = new ArrayBlockingQueue<>(10);
         Tren tren = new Tren();
-        Parque parque = new Parque(3, gestorTiempo, encargado, espacioVirtual, comedor, tren);
+        Parque parque = new Parque(5, gestorTiempo, encargado, espacioVirtual, comedor, tren);
         gestorTiempo.setParque(parque);
         Thread hiloGestorTiempo = new Thread(gestorTiempo);
 
@@ -39,7 +38,7 @@ public class TestPersonas {
         hiloConductor.start();
         hiloGestorTiempo.start();
 
-        int cantPersonas = 15;
+        int cantPersonas = 8;
         Thread[] hilos = new Thread[cantPersonas];
 
         for (int i = 0; i < cantPersonas; i++) {
