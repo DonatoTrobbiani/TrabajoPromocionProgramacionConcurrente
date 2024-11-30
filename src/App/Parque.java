@@ -22,6 +22,7 @@ public class Parque {
 
     private final Semaphore semaforoMolinetes;
     private final Semaphore mutex = new Semaphore(1);
+    private final Semaphore mutexShopping = new Semaphore(1);
 
     public Parque(int cantMolinetes, GestorTiempo gestorTiempo, Encargado[] encargado, EspacioVirtual ev,
             Comedor comedor, Tren trencito) {
@@ -52,7 +53,7 @@ public class Parque {
     }
 
     public boolean estaAbiertoParque() {
-        return gestorTiempo.getHora() >= 9 && gestorTiempo.getHora() < 18;
+        return gestorTiempo.getHora() >= 9 && gestorTiempo.getHora() < 23;
     }
 
     public boolean areaDeJuegos(Persona p) throws InterruptedException {
@@ -111,5 +112,21 @@ public class Parque {
 
     public boolean estanAbiertasAtracciones() {
         return gestorTiempo.getHora() <= 19;
+    }
+
+    public boolean entrarShopping(Persona persona) {
+        boolean respuesta = false;
+        try {
+            mutexShopping.acquire();
+            System.out.println(persona.getNombre() + " entró al shopping");
+            Thread.sleep(10000);
+            System.out.println(persona.getNombre() + " salió del shopping");
+            respuesta = true;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            mutexShopping.release();
+        }
+        return respuesta;
     }
 }

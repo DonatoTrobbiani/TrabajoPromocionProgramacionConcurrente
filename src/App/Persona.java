@@ -2,12 +2,15 @@ package App;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Persona implements Runnable {
     private final Parque parque;
     private final String nombre;
     private List<String> atracciones;
     private String premio = "Ninguno";
+    private final Random random = new Random();// Para elegir atracciones al azar
+    private final List<String> inventarioPremios = new ArrayList<>(); // Para guardar los premios
 
     public Persona(Parque parque, String nombrePersona) {
         this.parque = parque;
@@ -28,45 +31,76 @@ public class Persona implements Runnable {
             // 3. Si completa todas las atracciones, o se acaba el horario, sale del parque.
 
             // 1. Entra al parque
-            parque.entrarMolinete();
-            System.out.println("[PE] " + nombre + " entró al parque");
-            Thread.sleep(3000);// Simula el tiempo que tarda en llegar al molinete
-            System.out.println("[PE] " + nombre + " llegó al molinete");
-            parque.salirMolinete();
-
+            this.ingresoParque();
             // 2. Mientras esté en horario habilitado y queden atracciones por visitar:
-            int atraccionAnterior = -1;
-            boolean salida = false;
-            while (!salida && parque.estaAbiertoParque() && !atracciones.isEmpty()) {
-                // Simula el tiempo que tarda en dar una vuelta por el parque
-                // ! AGREGAR SHOPPING, DAR VUELTAS INDEFINIDAMENTE CON PROBABILIDAD DE SALIR (SI
-                // ! ES ANTES DE LAS 23 CLARO).
-                System.out.println("[PE] " + nombre + " está paseando por el parque.\n Actividades Pendientes: "
+            this.recorrerParque();
+        } catch (InterruptedException e) {
+            System.out.println("[Persona] " + nombre + " fue interrumpida:");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Método que simula el ingreso al parque.
+     * 
+     * @throws InterruptedException
+     */
+    private void ingresoParque() throws InterruptedException {
+        // 1. Entra al parque (tomando un semáforo. Si no puede tomarlo, se bloquea).
+        System.out.println("[Persona] " + nombre + " quiere entrar al parque.");
+        parque.entrarMolinete();
+        System.out.println("[Persona] " + nombre + " llegó a los molinetes.");
+
+        // 1.2 Simula el tiempo que tarda en llegar al molinete
+        Thread.sleep(1500);
+
+        // 1.3 Pasa el molinete
+        System.out.println("[Persona] " + nombre + " entró al parque.");
+        parque.salirMolinete();
+    }
+
+    public List<String> getInventarioPremios() {
+        return inventarioPremios;
+    }
+
+    /**
+     * Método que simula el recorrido por el parque.
+     * 
+     * @throws InterruptedException
+     */
+    private void recorrerParque() throws InterruptedException {
+        boolean salida = false;
+        int atraccionAnterior = -1;
+        while (!salida) {
+            // 0. Evalúa si puede seguir en el parque
+            if (!parque.estaAbiertoParque()) {
+                System.out.println("[Persona] " + nombre + " se va del parque...");
+                salida = true;
+            } else {
+                // 1. Recorre un poco el parque
+                System.out.println("[Persona] " + nombre + " está paseando por el parque.\n Actividades Pendientes: "
                         + atracciones.toString());
-                Thread.sleep((int) (Math.random() * 3000 + 3000));
+                Thread.sleep(2000);
+                // 2. Elige una actividad al azar
                 if (parque.estanAbiertasAtracciones()) {
-                    // Asegura no repetir actividades
+                    // 2.1 Asegura no repetir actividades
                     int atraccionActual;
                     do {
-                        atraccionActual = (int) (Math.random() * atracciones.size());
+                        atraccionActual = random.nextInt(atracciones.size());
                     } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
-                    // Intenta realizar la actividad
+
+                    // 2.2 Intenta realizar la actividad
                     boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
-                    // Si fue exitoso, quita la actividad de la lista
+
+                    // 2.3 Si fue exitoso, quita la actividad de la lista
                     if (exito) {
                         atracciones.remove(atraccionActual);
                     }
                     atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
-                } else {
-                    System.out.println("[PE] " + nombre + " no puede realizar actividades, el parque está cerrado.");
-                    salida = true;
                 }
             }
-            // 3. Si completa todas las atracciones o se acaba el horario, sale del parque
-            System.out.println("[PE] " + nombre + " sale del parque.");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+        System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
     }
 
     public String getPremio() {
@@ -101,8 +135,22 @@ public class Persona implements Runnable {
                 res = true;
                 // res = parque.areaDeJuegos(this);
                 break;
+            case "Shopping":
+                res = true;
+                break;
             default:
                 throw new InterruptedException("Actividad no encontrada.");
+        }
+        return res;
+    }
+
+    private boolean entrarShopping() throws InterruptedException {
+        boolean res = parque.entrarShopping(this);
+        if (res) {
+            System.out.println("[SH] " + nombre + " está comprando.");
+            Thread.sleep(3000);
+            System.out.println("[SH] " + nombre + " terminó de comprar.");
+            comproShopping = true;
         }
         return res;
     }
