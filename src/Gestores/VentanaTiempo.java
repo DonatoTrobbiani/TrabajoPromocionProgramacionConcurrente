@@ -1,5 +1,6 @@
 package Gestores;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,9 +26,14 @@ public class VentanaTiempo extends Thread {
             areaTexto = new JTextArea();
             areaTexto.setEditable(false);
             areaTexto.setFont(new Font("Monospaced", Font.PLAIN, 16));
+            areaTexto.setForeground(Color.WHITE);
+            areaTexto.setBackground(Color.BLACK);
             marco.add(areaTexto);
 
             marco.setVisible(true);
+            marco.setAlwaysOnTop(true);
+            marco.toFront();
+            marco.repaint();
         });
     }
 
