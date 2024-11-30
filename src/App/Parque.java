@@ -1,11 +1,11 @@
 package App;
 
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Exchanger;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
-import AreaDeJuegosDePremios.Encargado;
+import AreaDeJuegosDePremios.EncargadorJuegos;
 import Comedor.Comedor;
 import Gestores.*;
 import RealidadVirtual.EspacioVirtual;
@@ -15,22 +15,21 @@ public class Parque {
     // podemos agregar un semaforo mutex para chequear la disponibilidad del parque.
     private final int cantMolinetes;
     private final GestorTiempo gestorTiempo;
-    private final Encargado[] encargado;
+    private final EncargadorJuegos[] encargados;
     private final EspacioVirtual espacioVirtual;
     private final Comedor comedor;
     private final Tren trencito;
 
     private final Semaphore semaforoMolinetes;
     private final Semaphore mutex = new Semaphore(1);
-    private final Semaphore mutexShopping = new Semaphore(1);
 
-    public Parque(int cantMolinetes, GestorTiempo gestorTiempo, Encargado[] encargado, EspacioVirtual ev,
+    public Parque(int cantMolinetes, GestorTiempo gestorTiempo, EncargadorJuegos[] encargado, EspacioVirtual ev,
             Comedor comedor, Tren trencito) {
         this.cantMolinetes = cantMolinetes;
         this.semaforoMolinetes = new Semaphore(0);// empieza en 0 para que no se pueda entrar al parque hasta que
                                                   // abra
         this.gestorTiempo = gestorTiempo;
-        this.encargado = encargado;
+        this.encargados = encargado;
         this.espacioVirtual = ev;
         this.comedor = comedor;
         this.trencito = trencito;
@@ -56,44 +55,66 @@ public class Parque {
         return gestorTiempo.getHora() >= 9 && gestorTiempo.getHora() < 23;
     }
 
-    public boolean areaDeJuegos(Persona p) throws InterruptedException {
-        boolean respuesta = true;
-        Encargado encargadoDisponible = encargadoLibre();
+    /**
+     * Método que simula la entrada al área de juegos de premios.
+     * <p>
+     * Obtiene un encargado libre, o uno al azar si están todos ocupados, y le
+     * entrega una ficha al encargado. Luego espera a que el encargado le devuelva
+     * un premio en otro intercambio para agregarlo a su inventario.
+     * 
+     * @return boolean
+     * @throws InterruptedException
+     */
+    public boolean entrarAreaJuegos(Persona p) throws InterruptedException {
+        // ! SE PUEDE MEJORAR CON MUTEX EXCLUSIVOS DE CADA ENCARGADO
+        EncargadorJuegos encargadoDisponible = buscarEncargadoLibre();
         Exchanger<String> exchanger = encargadoDisponible.getExchanger();
-        String ficha = "Ficha";
+        String ficha = p.getNombre();
         mutex.acquire();
-        // El visitante da una ficha
-        System.out.println(p.getNombre() + " entregó una " + ficha);
-        // Intercambia la ficha por el premio
+
+        // Intercambia la ficha y espera.
+        System.out.println(
+                "[JU] " + p.getNombre() + " entregó una " + ficha + " al encargado.");
         ficha = exchanger.exchange(ficha);
-        p.setPremio(exchanger.exchange(null));
-        System.out.println(p.getNombre() + " recibí un " + p.getPremio());
+        p.agregarItem(exchanger.exchange(null));
+
         mutex.release();
-        return respuesta;
+        return true;
     }
 
     /**
      * Devuelve un encargado libre, si
      * no hay ninguno devuelve uno al azar.
      * 
-     * @return Encargado si hay uno libre, sino devuelve uno al azar.
+     * @return EncaargadorJuegos
      */
 
-    private Encargado encargadoLibre() {
+    private EncargadorJuegos buscarEncargadoLibre() {
         int i = 0;
         // Busca un encargado libre
-        while (i < encargado.length && encargado[i].isOcupado()) {
+        while (i < encargados.length && encargados[i].getEstado()) {
             i++;
         }
         // Si está dentro del rango de encargados, lo devuelve
         // sino devuelve uno al azar.
-        return i < encargado.length ? encargado[i] : encargado[(int) (Math.random() * encargado.length)];
+        return i < encargados.length ? encargados[i] : encargados[(int) (Math.random() * encargados.length)];
     }
 
+    /**
+     * Método que simula la entrada al área de realidad virtual.
+     * 
+     * @return boolean
+     * @throws InterruptedException
+     */
     public boolean entrarRealidadVirtual(Persona p) throws InterruptedException {
         return espacioVirtual.entrarVR(p);
     }
 
+    /**
+     * Método que simula la salida de la realidad virtual.
+     * 
+     * @throws InterruptedException
+     */
     public void salirRealidadVirtual(Persona p) throws InterruptedException {
         espacioVirtual.salirVR(p);
     }
@@ -106,27 +127,35 @@ public class Parque {
         return trencito.getQueue();
     }
 
+    /**
+     * Método que simula la entrada al área de trenes.
+     * 
+     * @return boolean
+     * @throws InterruptedException
+     */
     public boolean entrarAreaTrenes(Persona p) throws InterruptedException {
         return trencito.subirTren(p);
     }
 
+    /**
+     * Método para saber si las atracciones están abiertas.
+     * 
+     * @return boolean
+     */
     public boolean estanAbiertasAtracciones() {
         return gestorTiempo.getHora() <= 19;
     }
 
-    public boolean entrarShopping(Persona persona) {
-        boolean respuesta = false;
-        try {
-            mutexShopping.acquire();
-            System.out.println(persona.getNombre() + " entró al shopping");
-            Thread.sleep(10000);
-            System.out.println(persona.getNombre() + " salió del shopping");
-            respuesta = true;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            mutexShopping.release();
-        }
-        return respuesta;
+    /**
+     * Método que simula la compra de una prenda en el shopping.
+     * 
+     * @return String
+     */
+    public String comprarPrenda(Persona persona) {
+        Random random = new Random();
+        String[] colores = { "Rojo", "Azul", "Verde", "Amarillo", "Blanco" };
+        String[] tiposRopa = { "Pantalón", "Camisa", "Zapatos", "Bufanda", "Gorro" };
+        String prenda = tiposRopa[random.nextInt(tiposRopa.length)] + " " + colores[random.nextInt(colores.length)];
+        return prenda;
     }
 }

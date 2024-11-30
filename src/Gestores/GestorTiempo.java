@@ -6,6 +6,13 @@ import App.*;
 
 /**
  * Clase que se encarga de llevar el tiempo del parque.
+ * <p>
+ * GestorTiempo es un hilo que corre siempre y realizar operanciones en horarios
+ * especiales para que abra el parque, lo cierre, etc.
+ * <p>
+ * El complejo se encuentra abierto para el ingreso de 09:00 a 18:00hs.
+ * Las actividades cierran a las 19.00 hrs. Y a las 23hs no debería quedar nadie
+ * en el parque.
  * 
  * @author Gianfranco Gallucci, FAI-3824
  * @author Donato Trobbiani Perales, FAI-4492
@@ -15,7 +22,6 @@ public class GestorTiempo implements Runnable {
     private AtomicInteger hora;
     private AtomicInteger minutos;
     private Parque parque;
-    // ? puede mejorar con atomic boolean
 
     /**
      * Constructor de la clase GestorTiempo.
@@ -29,19 +35,11 @@ public class GestorTiempo implements Runnable {
         this.parque = parque;
     }
 
-    /*
-     * GestorTiempo corre siempre
-     * y realiza operaciones en horarios especiales para que abra, cierra.
-     * El complejo se encuentra abierto para el ingreso de 09:00 a 18:00hs.
-     * Considere que las actividades cierran a las 19.00 hrs. Y a las 23hs no
-     * debería quedar nadie en el parque.
-     */
-
     /**
      * Método run de la clase GestorTiempo.
      * Se encarga de llevar el tiempo del parque y realizar las acciones necesarias.
-     * Un segundo en la vida real equivale a 2 minutos en el programa.
-     * Una hora en el programa equivale a 30 segundos en la vida real.
+     * Un segundo en la vida real equivale a 2 minutos en el programa (1000ms).
+     * Una hora en el programa equivale a 30 segundos en la vida real (30000ms).
      */
     @Override
     public void run() {
@@ -53,7 +51,7 @@ public class GestorTiempo implements Runnable {
                 this.avanzarDia();// Avanza el día si es necesario
                 this.abrirParque();// Abre el parque si es necesario
                 this.cerrarParque();// Cierra el parque si es necesario
-                this.mensajesRestantes();
+                this.mensajesRestantes(); // Muestra mensajes restantes
                 // System.out.println(hora + ":" + minutos); // Debug
             }
         } catch (Exception e) {

@@ -4,7 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Exchanger;
 
-import AreaDeJuegosDePremios.Encargado;
+import AreaDeJuegosDePremios.EncargadorJuegos;
 import Comedor.Comedor;
 import Gestores.GestorTiempo;
 import RealidadVirtual.EspacioVirtual;
@@ -20,10 +20,10 @@ public class TestPersonas {
 
         int cantEncargados = 3;
         Thread[] hilosEncargados = new Thread[cantEncargados];
-        Encargado[] encargado = new Encargado[cantEncargados];
+        EncargadorJuegos[] encargado = new EncargadorJuegos[cantEncargados];
         for (int i = 0; i < cantEncargados; i++) {
             Exchanger<String> exchanger = new Exchanger<>();
-            encargado[i] = new Encargado(exchanger);
+            encargado[i] = new EncargadorJuegos(exchanger);
             hilosEncargados[i] = new Thread(encargado[i], "Encargado " + i);
             hilosEncargados[i].start();
         }
