@@ -22,6 +22,7 @@ public class GestorTiempo implements Runnable {
     private AtomicInteger hora;
     private AtomicInteger minutos;
     private Parque parque;
+    private VentanaTiempo ventanaTiempo;
 
     /**
      * Constructor de la clase GestorTiempo.
@@ -33,6 +34,9 @@ public class GestorTiempo implements Runnable {
         this.hora = new AtomicInteger(8);
         this.minutos = new AtomicInteger(50);
         this.parque = parque;
+
+        this.ventanaTiempo = new VentanaTiempo(hora, minutos);
+        this.ventanaTiempo.start();
     }
 
     /**
