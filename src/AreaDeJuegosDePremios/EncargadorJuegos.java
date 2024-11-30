@@ -2,8 +2,16 @@ package AreaDeJuegosDePremios;
 
 import java.util.concurrent.Exchanger;
 
+/**
+ * Clase que representa al encargado de juegos de premios, implementa {@link Runnable}.
+ * <p>
+ * Cuenta con un exchanger para recibir y entregar fichas de los jugadores y una
+ * variable booleana para controlar si está ocupado o no.
+ * 
+ * @author Gianfranco Gallucci FAI-3824
+ * @author Donato Trobbiani Perales FAI-4492
+ */
 public class EncargadorJuegos implements Runnable {
-    private String premio;
     private Exchanger<String> exchanger = new Exchanger<>();
     private boolean ocupado = false;
     private int puntos;
@@ -26,17 +34,17 @@ public class EncargadorJuegos implements Runnable {
     public void run() {
         try {
             while (true) {
-                // El encargado recibe la ficha
+                // 1. El encargado recibe la ficha
                 String jugadorFicha = exchanger.exchange(null);
                 this.cambiarEstado();
                 Thread.sleep(500);
                 System.out.println("[JU] Encargado: Recibí una " + jugadorFicha);
 
-                // Simular el juego
+                // 2. Simular el juego
                 Thread.sleep(5000);
-                premio = this.calcularPremio();
+                String premio = this.calcularPremio();
 
-                // Entregar el premio al visitante
+                // 3. Entregar el premio al visitante
                 System.out.println(
                         "[JU] " + jugadorFicha + ": Conseguí " + puntos + " puntos y recibió un " + premio + ".");
                 exchanger.exchange(premio);
@@ -46,18 +54,6 @@ public class EncargadorJuegos implements Runnable {
             System.out.println("[JU] Error en el encargado de juegos:");
             System.out.println(e.getMessage());
         }
-    }
-
-    public Exchanger<String> getExchanger() {
-        return exchanger;
-    }
-
-    private void cambiarEstado() {
-        ocupado = !ocupado;
-    }
-
-    public boolean getEstado() {
-        return ocupado;
     }
 
     /**
@@ -72,5 +68,19 @@ public class EncargadorJuegos implements Runnable {
         String[] premios = { "Premio pequeño", "Premio mediano", "Premio grande" };
         puntos = (int) (Math.random() * 100);
         return premios[(puntos < 30) ? 0 : (puntos < 70) ? 1 : 2];
+    }
+
+    // Getters y Setters
+
+    public Exchanger<String> getExchanger() {
+        return exchanger;
+    }
+
+    private void cambiarEstado() {
+        ocupado = !ocupado;
+    }
+
+    public boolean getEstado() {
+        return ocupado;
     }
 }

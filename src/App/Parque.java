@@ -11,17 +11,33 @@ import Gestores.*;
 import RealidadVirtual.EspacioVirtual;
 import TrenesDelParque.Tren;
 
+/**
+ * Clase que representa el parque de diversiones.
+ * <p>
+ * Cuenta con un semáforo para controlar la cantidad de personas que
+ * pueden entrar simultáneamente.
+ * <p>
+ * Al parque lo conforman un gestor de tiempo, un conjunto de Encargados de
+ * Juegos, un Espacio Virtual, un Comedor y un Tren.
+ * <p>
+ * @author Gianfranco Gallucci, FAI-3824
+ * @author Donato Trobbiani Perales, FAI-4492
+ * 
+ */
 public class Parque {
-    // podemos agregar un semaforo mutex para chequear la disponibilidad del parque.
-    private final int cantMolinetes;
-    private final GestorTiempo gestorTiempo;
-    private final EncargadorJuegos[] encargados;
-    private final EspacioVirtual espacioVirtual;
-    private final Comedor comedor;
-    private final Tren trencito;
-
     private final Semaphore semaforoMolinetes;
-    private final Semaphore mutex = new Semaphore(1);
+    private final int cantMolinetes;
+
+    private final GestorTiempo gestorTiempo;
+
+    private final EncargadorJuegos[] encargados;
+    private final Semaphore mutexJuegos = new Semaphore(1);
+
+    private final EspacioVirtual espacioVirtual;
+
+    private final Comedor comedor;
+
+    private final Tren tren;
 
     public Parque(int cantMolinetes, GestorTiempo gestorTiempo, EncargadorJuegos[] encargado, EspacioVirtual ev,
             Comedor comedor, Tren trencito) {
@@ -32,7 +48,7 @@ public class Parque {
         this.encargados = encargado;
         this.espacioVirtual = ev;
         this.comedor = comedor;
-        this.trencito = trencito;
+        this.tren = trencito;
     }
 
     public int getCantMolinetes() {
@@ -70,7 +86,7 @@ public class Parque {
         EncargadorJuegos encargadoDisponible = buscarEncargadoLibre();
         Exchanger<String> exchanger = encargadoDisponible.getExchanger();
         String ficha = p.getNombre();
-        mutex.acquire();
+        mutexJuegos.acquire();
 
         // Intercambia la ficha y espera.
         System.out.println(
@@ -78,7 +94,7 @@ public class Parque {
         ficha = exchanger.exchange(ficha);
         p.agregarItem(exchanger.exchange(null));
 
-        mutex.release();
+        mutexJuegos.release();
         return true;
     }
 
@@ -120,11 +136,19 @@ public class Parque {
     }
 
     public boolean entrarAreaComedor(Persona p) throws InterruptedException {
-        return comedor.entrarComedor(p);
+        return this.comedor.entrarComedor();
+    }
+
+    public boolean sentarseEnMesa(Persona p) {
+        return this.comedor.sentarseEnMesa(p);
+    }
+
+    public void salirAreaComedor() {
+        this.comedor.salirComedor();
     }
 
     public BlockingQueue<Persona> getQueue() {
-        return trencito.getQueue();
+        return tren.getQueue();
     }
 
     /**
@@ -134,7 +158,7 @@ public class Parque {
      * @throws InterruptedException
      */
     public boolean entrarAreaTrenes(Persona p) throws InterruptedException {
-        return trencito.subirTren(p);
+        return tren.subirTren(p);
     }
 
     /**
@@ -157,5 +181,9 @@ public class Parque {
         String[] tiposRopa = { "Pantalón", "Camisa", "Zapatos", "Bufanda", "Gorro" };
         String prenda = tiposRopa[random.nextInt(tiposRopa.length)] + " " + colores[random.nextInt(colores.length)];
         return prenda;
+    }
+
+    public int getHora() {
+        return gestorTiempo.getHora();
     }
 }

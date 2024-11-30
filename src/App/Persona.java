@@ -4,13 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Clase que representa a una persona que visita el parque, implementa
+ * {@link Runnable}.
+ * <p>
+ * Cada persona tiene un nombre y una lista de atracciones que debe visitar.
+ * Las atracciones son: Comedor, Trenes, Realidad Virtual, Area de Premios y
+ * Shopping.
+ * <p>
+ * En su rutina, una persona intenta entrar al parque, recorre las atracciones y
+ * luego sale.
+ * 
+ * @author Gianfranco Gallucci, FAI-3824
+ * @author Donato Trobbiani Perales, FAI-4492
+ * 
+ */
 public class Persona implements Runnable {
     private final Parque parque;
     private final String nombre;
     private List<String> atracciones;
-    private String premio = "Ninguno";
     private final Random random = new Random();// Para elegir atracciones al azar
-    private final List<String> inventarioPremios = new ArrayList<>(); // Para guardar los premios
+    private final List<String> inventarioPremios = new ArrayList<>(); // Inventario para guardar premios
 
     public Persona(Parque parque, String nombrePersona) {
         this.parque = parque;
@@ -20,17 +34,16 @@ public class Persona implements Runnable {
                 List.of("Comedor", "Trenes", "Realidad Virtual", "Area de Premios", "Shopping"));
     }
 
+    /**
+     * Método run de la clase Persona.
+     * <p>
+     * 1. Ingresa al parque haciendo uso de {@code ingresoParque()}.
+     * <p>
+     * 2. Recorre el parque haciendo uso de {@code recorrerParque()}.
+     */
     @Override
     public void run() {
         try {
-            // 1. Entra al parque (tomando un semáforo. Si no puede tomarlo, se bloquea).
-            // 2. Mientras esté en horario abilitado y queden atracciones por visitar:
-            // 2.1 Toma una atracción al azar y la realiza (o no, dependiendo de la
-            // atracción puede volver a esperar o hacer otra cosa).
-            // 2.2 Se guarda la atracción anterior para no repetirla, y se elige otra.
-            // 2.3 Si se realiza con éxito, se quita de la lista de atracciones pendientes.
-            // 3. Si completa todas las atracciones, o se acaba el horario, sale del parque.
-
             // 1. Entra al parque
             this.ingresoParque();
             // 2. Mientras esté en horario habilitado y queden atracciones por visitar:
@@ -52,16 +65,12 @@ public class Persona implements Runnable {
         parque.entrarMolinete();
         System.out.println("[Persona] " + nombre + " llegó a los molinetes.");
 
-        // 1.2 Simula el tiempo que tarda en llegar al molinete
+        // 2. Simula el tiempo que tarda en llegar al molinete
         Thread.sleep(1500);
 
-        // 1.3 Pasa el molinete
+        // 3. Pasa el molinete
         System.out.println("[Persona] " + nombre + " entró al parque.");
         parque.salirMolinete();
-    }
-
-    public List<String> getInventarioPremios() {
-        return inventarioPremios;
     }
 
     /**
@@ -70,29 +79,33 @@ public class Persona implements Runnable {
      * @throws InterruptedException
      */
     private void recorrerParque() throws InterruptedException {
-        // ! FALTA HACER QUE NO EJECUTE EL CÓDIGO SI COMPLETÓ TODAS LAS ACTIVIDADES.
-        // Y SOLO RECORRA EL PARQUE
         boolean salida = false;
         int atraccionAnterior = -1;
         while (!salida) {
-            // 0. Evalúa si puede seguir en el parque
+            // 0. Evalúa si puede estar en el parque.
             if (!parque.estaAbiertoParque()) {
                 System.out.println("[Persona] " + nombre + " se va del parque...");
                 salida = true;
             } else {
+                // 1. Evalúa si quedan atracciones por visitar
                 if (atracciones.isEmpty()) {
-                    System.out.println("[Persona] " + nombre + " completó todas las actividades.");
+                    // 1.1. Si no quedan atracciones, se queda un rato más en el parque
+                    System.out.println("[Persona] " + nombre
+                            + " completó todas las actividades. Va a recorrer el parque por un tiempo.");
+                    if (parque.getHora() < 22) {
+                        Thread.sleep((int) Math.random() * 30000); // Máx una hora.
+                    }
                     salida = true;
                 } else {
-                    // 1. Recorre un poco el parque
+                    // 1.1. Recorre un poco el parque
                     System.out
                             .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades Pendientes: "
                                     + atracciones.toString());
-                    // Simual el tiempo que tarda en recorrer el parque (max 20min)
-                    Thread.sleep((int) Math.random() * 5000 + 5000);
+                    Thread.sleep((int) Math.random() * 5000 + 5000); // (min 10min, max 20min)
+
                     // 2. Elige una actividad al azar
                     if (parque.estanAbiertasAtracciones()) {
-                        // 2.1 Asegura no repetir actividades
+                        // 2.1 Se asegura de no repetir actividades
                         int atraccionActual;
                         do {
                             atraccionActual = random.nextInt(atracciones.size());
@@ -113,36 +126,35 @@ public class Persona implements Runnable {
         System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
     }
 
-    public String getPremio() {
-        return premio;
-    }
-
-    public void setPremio(String premio) {
-        this.premio = premio;
-    }
-
+    /**
+     * Método que simula la elección y ejecución de una actividad.
+     * 
+     * @param String atraccion
+     * @return boolean
+     * @throws InterruptedException
+     */
     private boolean hacerSiguienteActividad(String atraccion) throws InterruptedException {
-        boolean res = false;
+        boolean respuesta = false;
         switch (atraccion) {
             case "Comedor":
-                res = this.entrarAreaComedor();
+                respuesta = this.entrarAreaComedor();
                 break;
-            case "Trenes": // * CARTELES CORREGIDOS, TIEMPOS CORREGIDOS
-                res = this.entrarAreaTrenes();
+            case "Trenes":
+                respuesta = this.entrarAreaTrenes();
                 break;
-            case "Realidad Virtual": // * CARTELES CORREGIDOS, TIEMPOS CORREGIDOS
-                res = this.entrarAreaVR();
+            case "Realidad Virtual":
+                respuesta = this.entrarAreaVR();
                 break;
-            case "Area de Premios": // * CARTELES CORREGIDOS, TIEMPOS CORREGIDOS
-                res = this.entrarAreaJuegos();
+            case "Area de Premios":
+                respuesta = this.entrarAreaJuegos();
                 break;
-            case "Shopping": // * CARTELES CORREGIDOS, TIEMPOS CORREGIDOS
-                res = this.entrarShopping();
+            case "Shopping":
+                respuesta = this.entrarShopping();
                 break;
             default:
                 throw new InterruptedException("Actividad no encontrada.");
         }
-        return res;
+        return respuesta;
     }
 
     /**
@@ -200,12 +212,26 @@ public class Persona implements Runnable {
         return respuesta;
     }
 
+    /**
+     * Método que simula la entrada al área de comedor.
+     * <p>
+     * Cuando una persona logra entrar, se sienta en una mesa y come algo.
+     * Si no logra entrar al comedor o no consigue otras 3 personas para comer, no
+     * come.
+     * 
+     * @throws InterruptedException
+     */
     private boolean entrarAreaComedor() throws InterruptedException {
         boolean respuesta = parque.entrarAreaComedor(this);
         if (respuesta) {
-            System.out.println(nombre + " está comiendo.");
-            Thread.sleep(3000);
-            System.out.println(nombre + " terminó de comer.");
+            System.out.println("[COM] " + nombre + " quiere comer algo.");
+            respuesta = parque.sentarseEnMesa(this);
+            if (respuesta) {
+                System.out.println("[COM] " + nombre + " está comiendo.");
+                Thread.sleep((int) Math.random() * 10000 + 10000);// (Min 20min, Max 30min)
+                System.out.println("[COM] " + nombre + " terminó de comer.");
+                parque.salirAreaComedor();
+            }
         }
         return respuesta;
     }
@@ -225,11 +251,41 @@ public class Persona implements Runnable {
         return respuesta;
     }
 
+    // * Getters y Setters
+
     public String getNombre() {
         return nombre;
     }
 
+    public List<String> getInventarioPremios() {
+        return inventarioPremios;
+    }
+
     public void agregarItem(String item) {
         inventarioPremios.add(item);
+    }
+
+    // * Métodos de Object
+
+    @Override
+    public String toString() {
+        return nombre;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean respuesta = false;
+        if (this == obj) {
+            respuesta = true;
+        } else if (obj instanceof Persona) {
+            Persona p = (Persona) obj;
+            respuesta = this.nombre.equals(p.nombre);
+        }
+        return respuesta;
+    }
+
+    @Override
+    public int hashCode() {
+        return nombre.hashCode();
     }
 }

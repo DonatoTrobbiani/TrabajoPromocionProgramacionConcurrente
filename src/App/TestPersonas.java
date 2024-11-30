@@ -1,9 +1,6 @@
 package App;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Exchanger;
-
 import AreaDeJuegosDePremios.EncargadorJuegos;
 import Comedor.Comedor;
 import Gestores.GestorTiempo;
@@ -38,7 +35,7 @@ public class TestPersonas {
         hiloConductor.start();
         hiloGestorTiempo.start();
 
-        int cantPersonas = 8;
+        int cantPersonas = 11;
         Thread[] hilos = new Thread[cantPersonas];
 
         for (int i = 0; i < cantPersonas; i++) {
