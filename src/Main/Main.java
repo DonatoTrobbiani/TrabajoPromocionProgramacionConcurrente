@@ -1,11 +1,13 @@
-package App;
+package Main;
 
 import java.util.Scanner;
 
+import App.Parque;
+import App.Persona;
 import Gestores.GestorTiempo;
 import RealidadVirtual.EspacioVirtual;
 
-public class TestPersonas {
+public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -18,6 +20,8 @@ public class TestPersonas {
 
         System.out.println("Bienvenido al simulador de parque de diversiones.");
         System.out.println("Desea utilizar los valores por defecto? (1: Sí, 0: No)");
+        System.out.println("Equipos de readlidad virtual: " + cantVR + "\nEncargados de juegos: "
+                + cantEncargadosJuegos + "\nPersonas: " + cantPersonas + "\nMolinetes: " + cantMolinetes);
         char opcion = scanner.next().charAt(0);
 
         if (opcion == '0') {
@@ -58,6 +62,6 @@ public class TestPersonas {
             hiloGestorTiempo.interrupt();
         } catch (InterruptedException e) {
             System.out.println("Simulación terminada.");
-        } 
+        }
     }
 }
