@@ -10,6 +10,12 @@ public class Tren {
     private final BlockingQueue<Persona> queue = new ArrayBlockingQueue<>(CAPACIDAD);
     private AtomicBoolean trenEnMovimiento = new AtomicBoolean(false);
     private static final int CAPACIDAD = 10;
+    private Conductor conductor;
+
+    public Tren() {
+        this.conductor = new Conductor(this);
+        new Thread(conductor).start();
+    }
 
     /**
      * Método que utiliza una persona para subir al tren.

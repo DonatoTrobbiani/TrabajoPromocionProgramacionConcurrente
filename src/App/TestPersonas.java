@@ -1,45 +1,53 @@
 package App;
 
-import java.util.concurrent.Exchanger;
-import AreaDeJuegosDePremios.EncargadorJuegos;
-import Comedor.Comedor;
+import java.util.Scanner;
+
 import Gestores.GestorTiempo;
 import RealidadVirtual.EspacioVirtual;
-import TrenesDelParque.Conductor;
-import TrenesDelParque.Tren;
 
 public class TestPersonas {
+
     public static void main(String[] args) {
-        GestorTiempo gestorTiempo = new GestorTiempo(null);
-        int cantRecursos = 1;
-        EspacioVirtual espacioVirtual = new EspacioVirtual(cantRecursos, cantRecursos * 2, cantRecursos, gestorTiempo);
-        Comedor comedor = new Comedor();
+        Scanner scanner = new Scanner(System.in);
 
-        int cantEncargados = 3;
-        Thread[] hilosEncargados = new Thread[cantEncargados];
-        EncargadorJuegos[] encargado = new EncargadorJuegos[cantEncargados];
-        for (int i = 0; i < cantEncargados; i++) {
-            Exchanger<String> exchanger = new Exchanger<>();
-            encargado[i] = new EncargadorJuegos(exchanger);
-            hilosEncargados[i] = new Thread(encargado[i], "Encargado " + i);
-            hilosEncargados[i].start();
+        // Valores por defecto
+        int cantVR = 1;
+        int cantEncargadosJuegos = 3;
+        int cantPersonas = 5;
+        int cantMolinetes = 3;
+
+        System.out.println("Bienvenido al simulador de parque de diversiones.");
+        System.out.println("Desea utilizar los valores por defecto? (1: Sí, 0: No)");
+        char opcion = scanner.next().charAt(0);
+
+        if (opcion == '0') {
+            // Ingresa los nuevos valores
+            System.out.println("Ingrese la cantidad de equipos del espacio virtual (por defecto 1):");
+            cantVR = scanner.nextInt();
+
+            System.out.println("Ingrese la cantidad de encargados de juegos (por defecto 3):");
+            cantEncargadosJuegos = scanner.nextInt();
+
+            System.out.println("Ingrese la cantidad de personas (por defecto 5):");
+            cantPersonas = scanner.nextInt();
+
+            System.out.println("Ingrese la cantidad de molinetes del parque (por defecto 3):");
+            cantMolinetes = scanner.nextInt();
         }
+        scanner.close();
 
-        Tren tren = new Tren();
-        Parque parque = new Parque(5, gestorTiempo, encargado, espacioVirtual, comedor, tren);
+        // Inicializa el parque
+
+        GestorTiempo gestorTiempo = new GestorTiempo(null);
+        EspacioVirtual espacioVirtual = new EspacioVirtual(cantVR, cantVR * 2, cantVR, gestorTiempo);
+        Parque parque = new Parque(cantMolinetes, gestorTiempo, cantEncargadosJuegos, espacioVirtual);
         gestorTiempo.setParque(parque);
         Thread hiloGestorTiempo = new Thread(gestorTiempo);
-
-        Conductor conductor = new Conductor(tren);
-        Thread hiloConductor = new Thread(conductor, "Conductor");
-        hiloConductor.start();
-        hiloGestorTiempo.start();
-
-        int cantPersonas = 11;
         Thread[] hilos = new Thread[cantPersonas];
 
+        hiloGestorTiempo.start();
         for (int i = 0; i < cantPersonas; i++) {
-            hilos[i] = new Thread(new Persona(parque, "Persona " + i), "Persona " + i);
+            hilos[i] = new Thread(new Persona(parque, "Persona " + i));
             hilos[i].start();
         }
 
@@ -47,9 +55,9 @@ public class TestPersonas {
             for (Thread thread : hilos) {
                 thread.join();
             }
-            System.out.println("Simulación terminada.");
+            hiloGestorTiempo.interrupt();
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            System.out.println("Simulación terminada.");
+        } 
     }
 }

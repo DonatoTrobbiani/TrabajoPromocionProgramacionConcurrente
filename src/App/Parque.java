@@ -20,6 +20,7 @@ import TrenesDelParque.Tren;
  * Al parque lo conforman un gestor de tiempo, un conjunto de Encargados de
  * Juegos, un Espacio Virtual, un Comedor y un Tren.
  * <p>
+ * 
  * @author Gianfranco Gallucci, FAI-3824
  * @author Donato Trobbiani Perales, FAI-4492
  * 
@@ -39,16 +40,19 @@ public class Parque {
 
     private final Tren tren;
 
-    public Parque(int cantMolinetes, GestorTiempo gestorTiempo, EncargadorJuegos[] encargado, EspacioVirtual ev,
-            Comedor comedor, Tren trencito) {
+    public Parque(int cantMolinetes, GestorTiempo gestorTiempo, int cantidadEncargados, EspacioVirtual ev) {
         this.cantMolinetes = cantMolinetes;
         this.semaforoMolinetes = new Semaphore(0);// empieza en 0 para que no se pueda entrar al parque hasta que
                                                   // abra
         this.gestorTiempo = gestorTiempo;
-        this.encargados = encargado;
+        this.encargados = new EncargadorJuegos[cantidadEncargados];
+        for (int i = 0; i < cantidadEncargados; i++) {
+            encargados[i] = new EncargadorJuegos(new Exchanger<>());
+            new Thread(encargados[i]).start();
+        }
         this.espacioVirtual = ev;
-        this.comedor = comedor;
-        this.tren = trencito;
+        this.comedor = new Comedor();
+        this.tren = new Tren();
     }
 
     public int getCantMolinetes() {
@@ -167,7 +171,7 @@ public class Parque {
      * @return boolean
      */
     public boolean estanAbiertasAtracciones() {
-        return gestorTiempo.getHora() <= 19;
+        return gestorTiempo.getHora() >= 9 && gestorTiempo.getHora() < 19;
     }
 
     /**

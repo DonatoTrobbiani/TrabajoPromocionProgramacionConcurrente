@@ -55,7 +55,7 @@ public class GestorTiempo implements Runnable {
                 // System.out.println(hora + ":" + minutos); // Debug
             }
         } catch (Exception e) {
-            System.out.println("Revisar el gestor de tiempo:\n" + e.getMessage());
+            // TODO: Implementar manejo de excepción
         }
     }
 

@@ -88,40 +88,44 @@ public class Persona implements Runnable {
                 salida = true;
             } else {
                 // 1. Evalúa si quedan atracciones por visitar
-                if (atracciones.isEmpty()) {
-                    // 1.1. Si no quedan atracciones, se queda un rato más en el parque
+                if (atracciones.isEmpty() || !parque.estanAbiertasAtracciones()) {
+                    // 1.1. Si no quedan atracciones o estas cerraron,
+                    // se queda un rato más en el parque
                     System.out.println("[Persona] " + nombre
-                            + " completó todas las actividades. Va a recorrer el parque por un tiempo.");
-                    if (parque.getHora() < 22) {
-                        Thread.sleep((int) Math.random() * 30000); // Máx una hora.
-                    }
+                            + " se prepara para retirarse. Va a recorrer el parque por un rato.");
                     salida = true;
-                } else {
+                } else if (parque.estanAbiertasAtracciones()) {
                     // 1.1. Recorre un poco el parque
                     System.out
-                            .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades Pendientes: "
+                            .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades restantes: "
                                     + atracciones.toString());
                     Thread.sleep((int) Math.random() * 5000 + 5000); // (min 10min, max 20min)
 
                     // 2. Elige una actividad al azar
-                    if (parque.estanAbiertasAtracciones()) {
-                        // 2.1 Se asegura de no repetir actividades
-                        int atraccionActual;
-                        do {
-                            atraccionActual = random.nextInt(atracciones.size());
-                        } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
+                    // 2.1 Se asegura de no repetir actividades
+                    int atraccionActual;
+                    do {
+                        atraccionActual = random.nextInt(atracciones.size());
+                    } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
+                    System.out.println("[DEBUG] " + nombre + " elige: " + atracciones.get(atraccionActual).toString());
 
-                        // 2.2 Intenta realizar la actividad
-                        boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
+                    // 2.2 Intenta realizar la actividad
+                    boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
 
-                        // 2.3 Si fue exitoso, quita la actividad de la lista
-                        if (exito) {
-                            atracciones.remove(atraccionActual);
-                        }
-                        atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
+                    // 2.3 Si fue exitoso, quita la actividad de la lista
+                    if (exito) {
+                        System.out.println("[DEBUG] " + nombre + " terminó la actividad: "
+                                + atracciones.get(atraccionActual));
+                        atracciones.remove(atraccionActual);
                     }
+                    atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
                 }
             }
+        }
+        if (parque.getHora() < 22) {
+            Thread.sleep((int) Math.random() * 30000); // Máx una hora.
+        } else {
+            Thread.sleep((int) Math.random() * 15000); // Máx media hora.
         }
         System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
     }
@@ -246,7 +250,7 @@ public class Persona implements Runnable {
     private boolean entrarAreaTrenes() throws InterruptedException {
         boolean respuesta = parque.entrarAreaTrenes(this);
         if (respuesta) {
-            System.out.println("[TR_P] " + nombre + " se bajó del tren.--------------");
+            System.out.println("[TR_P] " + nombre + " se bajó del tren.");
         }
         return respuesta;
     }
