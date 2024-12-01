@@ -9,7 +9,7 @@ import Gestores.GestorTiempo;
  * Cuenta con un método para que las personas puedan entrar a la Realidad
  * Virtual y otro para el momento de salida.
  * <p>
- * Como mecanismo de sincronización, se utiliza un monitor para controlar la 
+ * Como mecanismo de sincronización, se utiliza un monitor para controlar la
  * cantidad de visores, manoplas y bases disponibles. Y un gestor de tiempo para
  * verificar si la actividad dejó de estar disponible en el periodo de espera.
  * 
@@ -20,6 +20,7 @@ public class EspacioVirtual {
     private int cantidadVisores;
     private int cantManoplas;
     private int cantBases;
+    private int cantPersonasEnEspera = 0;
     private final GestorTiempo gestorTiempo;
 
     public EspacioVirtual(int cantVR, int cantManoplas, int cantBases, GestorTiempo gestorTiempo) {
@@ -43,23 +44,29 @@ public class EspacioVirtual {
      */
     public synchronized boolean entrarVR(Persona p) throws InterruptedException {
         boolean tieneEquipamiento = false, continuarActividad = true;
+        cantPersonasEnEspera++;
         while (continuarActividad) {
-            //1. Verificar si está dentro del horario de la actividad.
+            // 1. Verificar si está dentro del horario de la actividad.
             if (gestorTiempo.getHora() >= 19) {
                 System.out.println(
                         "[VR] " + p.getNombre()
                                 + " no puede entrar a la Realidad Virtual porque cerraron las actividades.");
                 continuarActividad = false;
+                cantPersonasEnEspera--;
+                if (cantPersonasEnEspera > 0) {
+                    notify();// Despierta a la siguiente persona en espera
+                }
             } else if (cantidadVisores < 1 || cantManoplas < 2 || cantBases < 1) {
-                //1.1. Verificar si hay equipamiento disponible.
+                // 1.1. Verificar si hay equipamiento disponible.
                 System.out.println("[VR] " + p.getNombre()
                         + " debe esperar en el espacio virtual, no hay equipos suficientes.");
                 wait();
             } else {
-                //1.2. Si hay equipamiento disponible, la persona entra.
+                // 1.2. Si hay equipamiento disponible, la persona entra.
                 cantidadVisores--;
                 cantManoplas -= 2;
                 cantBases--;
+                cantPersonasEnEspera--;
                 System.out.println("[VR] " + p.getNombre() + " entró a la Realidad Virtual");
                 tieneEquipamiento = true;
                 continuarActividad = false;

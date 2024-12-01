@@ -3,7 +3,8 @@ package AreaDeJuegosDePremios;
 import java.util.concurrent.Exchanger;
 
 /**
- * Clase que representa al encargado de juegos de premios, implementa {@link Runnable}.
+ * Clase que representa al encargado de juegos de premios, implementa
+ * {@link Runnable}.
  * <p>
  * Cuenta con un exchanger para recibir y entregar fichas de los jugadores y una
  * variable booleana para controlar si está ocupado o no.
@@ -11,17 +12,17 @@ import java.util.concurrent.Exchanger;
  * @author Gianfranco Gallucci FAI-3824
  * @author Donato Trobbiani Perales FAI-4492
  */
-public class EncargadorJuegos implements Runnable {
+public class EncargadoJuegos implements Runnable {
     private Exchanger<String> exchanger = new Exchanger<>();
     private boolean ocupado = false;
     private int puntos;
 
-    public EncargadorJuegos(Exchanger<String> exchanger) {
+    public EncargadoJuegos(Exchanger<String> exchanger) {
         this.exchanger = exchanger;
     }
 
     /**
-     * Método run de la clase EncargadorJuegos.
+     * Método run de la clase EncargadoJuegos.
      * <p>
      * Se encarga de recibir la ficha del jugador, simular el juego y entregar el
      * premio al visitante.
@@ -38,7 +39,7 @@ public class EncargadorJuegos implements Runnable {
                 String jugadorFicha = exchanger.exchange(null);
                 this.cambiarEstado();
                 Thread.sleep(500);
-                System.out.println("[JU] Encargado: Recibí una " + jugadorFicha);
+                System.out.println("[JU] Encargado: Recibí una ficha de: " + jugadorFicha + ".");
 
                 // 2. Simular el juego
                 Thread.sleep(5000);

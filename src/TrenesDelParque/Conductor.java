@@ -40,6 +40,7 @@ public class Conductor implements Runnable {
                 long tiempoDeEspera = System.currentTimeMillis() + 10000;
                 // Acepta pasajeros hasta que se llene el tren o pase el tiempo de espera
                 while (System.currentTimeMillis() < tiempoDeEspera && cantidadDePasajeros < 10) {
+                    // ! ESPERA ACTIVA
                     if (colaPasajeros.size() > 0) {
                         colaPasajeros.take();
                         cantidadDePasajeros++;

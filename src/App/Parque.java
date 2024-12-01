@@ -5,9 +5,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Exchanger;
 import java.util.concurrent.Semaphore;
 
-import AreaDeJuegosDePremios.EncargadorJuegos;
+import AreaDeJuegosDePremios.EncargadoJuegos;
 import Comedor.Comedor;
-import Gestores.*;
+import Gestores.GestorTiempo;
 import RealidadVirtual.EspacioVirtual;
 import TrenesDelParque.Tren;
 
@@ -31,7 +31,7 @@ public class Parque {
 
     private final GestorTiempo gestorTiempo;
 
-    private final EncargadorJuegos[] encargados;
+    private final EncargadoJuegos[] encargados;
     private final Semaphore mutexJuegos = new Semaphore(1);
 
     private final EspacioVirtual espacioVirtual;
@@ -45,9 +45,9 @@ public class Parque {
         this.semaforoMolinetes = new Semaphore(0);// empieza en 0 para que no se pueda entrar al parque hasta que
                                                   // abra
         this.gestorTiempo = gestorTiempo;
-        this.encargados = new EncargadorJuegos[cantidadEncargados];
+        this.encargados = new EncargadoJuegos[cantidadEncargados];
         for (int i = 0; i < cantidadEncargados; i++) {
-            encargados[i] = new EncargadorJuegos(new Exchanger<>());
+            encargados[i] = new EncargadoJuegos(new Exchanger<>());
             new Thread(encargados[i]).start();
         }
         this.espacioVirtual = ev;
@@ -87,7 +87,7 @@ public class Parque {
      */
     public boolean entrarAreaJuegos(Persona p) throws InterruptedException {
         // ! SE PUEDE MEJORAR CON MUTEX EXCLUSIVOS DE CADA ENCARGADO
-        EncargadorJuegos encargadoDisponible = buscarEncargadoLibre();
+        EncargadoJuegos encargadoDisponible = buscarEncargadoLibre();
         Exchanger<String> exchanger = encargadoDisponible.getExchanger();
         String ficha = p.getNombre();
         mutexJuegos.acquire();
@@ -109,7 +109,7 @@ public class Parque {
      * @return EncaargadorJuegos
      */
 
-    private EncargadorJuegos buscarEncargadoLibre() {
+    private EncargadoJuegos buscarEncargadoLibre() {
         int i = 0;
         // Busca un encargado libre
         while (i < encargados.length && encargados[i].getEstado()) {
