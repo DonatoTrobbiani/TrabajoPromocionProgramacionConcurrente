@@ -86,7 +86,6 @@ public class Parque {
      * @throws InterruptedException
      */
     public boolean entrarAreaJuegos(Persona p) throws InterruptedException {
-        // ! SE PUEDE MEJORAR CON MUTEX EXCLUSIVOS DE CADA ENCARGADO
         EncargadoJuegos encargadoDisponible = buscarEncargadoLibre();
         Exchanger<String> exchanger = encargadoDisponible.getExchanger();
         String ficha = p.getNombre();

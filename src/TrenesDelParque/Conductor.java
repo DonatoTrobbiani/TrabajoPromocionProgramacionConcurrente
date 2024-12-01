@@ -1,6 +1,7 @@
 package TrenesDelParque;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import App.Persona;
 
@@ -38,12 +39,23 @@ public class Conductor implements Runnable {
                 int cantidadDePasajeros = 1;
                 // Comienza a contar el tiempo de partida
                 long tiempoDeEspera = System.currentTimeMillis() + 10000;
+                boolean esperandoPasajeros = true;
                 // Acepta pasajeros hasta que se llene el tren o pase el tiempo de espera
-                while (System.currentTimeMillis() < tiempoDeEspera && cantidadDePasajeros < 10) {
-                    // ! ESPERA ACTIVA
-                    if (colaPasajeros.size() > 0) {
-                        colaPasajeros.take();
-                        cantidadDePasajeros++;
+                while (esperandoPasajeros && cantidadDePasajeros < 10) {
+                    long tiempoRestante = tiempoDeEspera - System.currentTimeMillis();
+                    if (tiempoRestante <= 0) {
+                        // Se acabó el tiempo de espera
+                        esperandoPasajeros = false;
+                    } else {
+                        // Espera a que llegue un pasajero o se acabe el tiempo
+                        Persona pasajero = colaPasajeros.poll(tiempoRestante, TimeUnit.MILLISECONDS);
+                        if (pasajero != null) {
+                            // System.out.println("[TR_C]: Aceptando pasajero " + pasajero.getNombre());
+                            cantidadDePasajeros++;
+                        } else {
+                            // Timeout, no llegaron más pasajeros
+                            esperandoPasajeros = false;
+                        }
                     }
                 }
                 tren.setEstadoTren(true);
