@@ -32,13 +32,15 @@ public class Conductor implements Runnable {
      */
     @Override
     public void run() {
+        // ! NOTA TIEMPOS CONSIGNA: 5 minutos en parque = 2.5 segundos reales, muy poco
+        // ! TIEMPOS PROPUESTOS: 20 minutos en parque = 10 segundos reales, más realista
         while (true) {
             try {
                 System.out.println("[TR_C]: Esperando pasajeros");
                 colaPasajeros.take(); // se bloquea hasta que llegue un pasajero
                 int cantidadDePasajeros = 1;
                 // Comienza a contar el tiempo de partida
-                long tiempoDeEspera = System.currentTimeMillis() + 10000;
+                long tiempoDeEspera = System.currentTimeMillis() + 10000;// (10s reales, 20min en el parque)
                 boolean esperandoPasajeros = true;
                 // Acepta pasajeros hasta que se llene el tren o pase el tiempo de espera
                 while (esperandoPasajeros && cantidadDePasajeros < 10) {
@@ -61,17 +63,15 @@ public class Conductor implements Runnable {
                 tren.setEstadoTren(true);
                 // Simula el recorrido
                 System.out.println("[TR_C]: Iniciando recorrido, no acepta más pasajeros.");
-                Thread.sleep(5000); // (5s reales, 10min en el parque)
+                Thread.sleep(10000); // (10s reales, 20min en el parque)
                 System.out.println("[TR_C]: Finalizando recorrido, pasajeros a desbordar en unos minutos.");
                 // llegó al recorrido, despierta a todos los pasajeros, limpia la cola por
                 // seguridad y se pone en espera.
-                Thread.sleep(1500);// (1.5s reales, 3min en el parque)
+                Thread.sleep(2500);// (2.5s reales, 5min en el parque)
                 tren.reiniciarTren();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
-    // NOTA TIEMPOS CONSIGNA: 5 minutos en parque = 2.5 segundos reales, muy poco
-    // tiempo de espera.
 }
