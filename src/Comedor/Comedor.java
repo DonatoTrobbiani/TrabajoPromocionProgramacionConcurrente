@@ -74,7 +74,7 @@ public class Comedor {
                 System.out.println("[COM] " + p.getNombre() + " se ha sentado en la mesa.");
             }
             // 2. Se espera a que se complete la mesa.
-            mesasCyclicBarrier.await(5, TimeUnit.SECONDS);
+            mesasCyclicBarrier.await(10, TimeUnit.SECONDS); // (10s reales, 20min en el parque)
             exito = true;
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             if (e instanceof TimeoutException) {
@@ -93,19 +93,20 @@ public class Comedor {
                 // Se resetea la barrera (todos los hilos esperando en la barrera son
                 // liberados).
                 mesasCyclicBarrier.reset();
-                personasEnMesa.remove(p); // Se quita a la persona de la mesa.
-                if (personasEnMesa.isEmpty()) {
-                    mesasCyclicBarrier.reset();
-                }
+                salirBarrera(p);
             }
         } finally {
             synchronized (personasEnMesa) {
-                personasEnMesa.remove(p); // Se quita a la persona de la mesa.
-                if (personasEnMesa.isEmpty()) {
-                    mesasCyclicBarrier.reset();
-                }
+                salirBarrera(p);
             }
         }
         return exito;
+    }
+
+    private void salirBarrera(Persona p) {
+        personasEnMesa.remove(0);// Se quita a la persona de la mesa.
+        if (personasEnMesa.isEmpty()) {
+            mesasCyclicBarrier.reset();
+        }
     }
 }

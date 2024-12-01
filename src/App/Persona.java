@@ -25,6 +25,7 @@ public class Persona implements Runnable {
     private List<String> atracciones;
     private final Random random = new Random();// Para elegir atracciones al azar
     private final List<String> inventarioPremios = new ArrayList<>(); // Inventario para guardar premios
+    private int visitasComedor = 0;
 
     public Persona(Parque parque, String nombrePersona) {
         this.parque = parque;
@@ -66,7 +67,7 @@ public class Persona implements Runnable {
         System.out.println("[Persona] " + nombre + " llegó a los molinetes.");
 
         // 2. Simula el tiempo que tarda en llegar al molinete
-        Thread.sleep(1500);
+        Thread.sleep(5000);// (5 segundos reales, 10 minutos en el parque).
 
         // 3. Pasa el molinete
         System.out.println("[Persona] " + nombre + " entró al parque.");
@@ -97,7 +98,7 @@ public class Persona implements Runnable {
                     System.out
                             .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades restantes: "
                                     + atracciones.toString());
-                    Thread.sleep((int) Math.random() * 5000 + 5000); // (min 10min, max 20min)
+                    Thread.sleep((int) Math.random() * 10000 + 5000); // (min 10min, max 30min)
 
                     // 2. Elige una actividad al azar
                     // 2.1 Se asegura de no repetir dos actividades seguidas
@@ -127,9 +128,9 @@ public class Persona implements Runnable {
                 + " se prepara para retirarse. Va a recorrer el parque por un rato.");
         int periodoRecorrido;
         if (parque.getHora() < 22) {
-            periodoRecorrido = (int) Math.random() * 30000 + 30000; // Máx 1 hora
+            periodoRecorrido = (int) (Math.random() * 15000) + 15000; // (15-30s reales, 30-60 min en el parque)
         } else {
-            periodoRecorrido = (int) Math.random() * 15000 + 15000; // Máx 30min
+            periodoRecorrido = (int) (Math.random() * 7500) + 7500; // (7.5-15s reales, 15-30 min en el parque)
         }
         Thread.sleep(periodoRecorrido);
         System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
@@ -146,7 +147,14 @@ public class Persona implements Runnable {
         boolean respuesta = false;
         switch (atraccion) {
             case "Comedor":
-                respuesta = this.entrarAreaComedor();
+                visitasComedor++;
+                if (visitasComedor < 3) {
+                    respuesta = this.entrarAreaComedor();
+                } else {
+                    System.out
+                            .println("[COM] " + nombre + " intentó entrar al comedor 3 veces, no vuelve a intentarlo.");
+                }
+                respuesta = true;
                 break;
             case "Trenes":
                 respuesta = this.entrarAreaTrenes();
@@ -190,9 +198,9 @@ public class Persona implements Runnable {
         System.out.println("[SH] " + nombre + " está comprando en el shopping.");
         String item = parque.comprarPrenda(this);
         if (item != null) {
-            Thread.sleep(3000);
+            Thread.sleep((int) (Math.random() * 5000) + 5000); // (5-10s reales, 10-20 min en el parque)
             System.out.println("[SH] " + nombre + " compró " + item + ".");
-            Thread.sleep(1000);
+            Thread.sleep(2500); // (2.5s reales, 5min en el parque)
             this.agregarItem(item);
             System.out.println("[SH] " + nombre + " terminó de comprar en el shopping.");
         }
@@ -213,9 +221,9 @@ public class Persona implements Runnable {
         boolean respuesta = parque.entrarRealidadVirtual(this);
         if (respuesta) {
             System.out.println("[VR] " + nombre + " comienza la simulación.");
-            Thread.sleep(9000);// Simula la duración de la simulación
+            Thread.sleep((int) (Math.random() * 11250) + 11250);// (11.25-22.5s reales, 22.5-45min en el parque)
             System.out.println("[VR] " + nombre + " terminó la simulación.");
-            Thread.sleep(1000);// Simula el tiempo que tarda en salir
+            Thread.sleep(2500);// (2.5s, 5min en el parque)
             parque.salirRealidadVirtual(this);
         }
         return respuesta;
@@ -237,7 +245,7 @@ public class Persona implements Runnable {
             respuesta = parque.sentarseEnMesa(this);
             if (respuesta) {
                 System.out.println("[COM] " + nombre + " está comiendo.");
-                Thread.sleep((int) Math.random() * 10000 + 10000);// (Min 20min, Max 30min)
+                Thread.sleep((int) Math.random() * 10000 + 10000);// (10-20s reales, 20-40min en el parque)
                 System.out.println("[COM] " + nombre + " terminó de comer.");
                 parque.salirAreaComedor();
             }

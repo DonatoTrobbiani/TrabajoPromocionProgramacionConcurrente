@@ -38,11 +38,11 @@ public class EncargadoJuegos implements Runnable {
                 // 1. El encargado recibe la ficha
                 String jugadorFicha = exchanger.exchange(null);
                 this.cambiarEstado();
-                Thread.sleep(500);
+                Thread.sleep(500); // (1s real, 2min en el programa)
                 System.out.println("[JU] Encargado: Recibí una ficha de: " + jugadorFicha + ".");
 
                 // 2. Simular el juego
-                Thread.sleep(5000);
+                Thread.sleep(2500);// (2.5sreal, 5min en el programa)
                 String premio = this.calcularPremio();
 
                 // 3. Entregar el premio al visitante

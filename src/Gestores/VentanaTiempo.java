@@ -13,10 +13,12 @@ public class VentanaTiempo extends Thread {
     private JTextArea areaTexto;
     private AtomicInteger hora;
     private AtomicInteger minutos;
+    private int escalaTiempoMS;
 
-    public VentanaTiempo(AtomicInteger hora, AtomicInteger minutos) {
+    public VentanaTiempo(AtomicInteger hora, AtomicInteger minutos, GestorTiempo gestorTiempo) {
         this.hora = hora;
         this.minutos = minutos;
+        this.escalaTiempoMS = gestorTiempo.getEscalaTiempoMS();
 
         SwingUtilities.invokeLater(() -> {
             marco = new JFrame("Tiempo");
@@ -41,7 +43,7 @@ public class VentanaTiempo extends Thread {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(escalaTiempoMS);
                 SwingUtilities.invokeLater(() -> {
                     areaTexto.setText(String.format("   %02d:%02d\n", hora.get(), minutos.get()));
                 });

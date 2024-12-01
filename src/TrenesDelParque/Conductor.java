@@ -61,15 +61,17 @@ public class Conductor implements Runnable {
                 tren.setEstadoTren(true);
                 // Simula el recorrido
                 System.out.println("[TR_C]: Iniciando recorrido, no acepta más pasajeros.");
-                Thread.sleep(10000);
+                Thread.sleep(5000); // (5s reales, 10min en el parque)
                 System.out.println("[TR_C]: Finalizando recorrido, pasajeros a desbordar en unos minutos.");
                 // llegó al recorrido, despierta a todos los pasajeros, limpia la cola por
                 // seguridad y se pone en espera.
-                Thread.sleep(1250);// 5 minutos
+                Thread.sleep(1500);// (1.5s reales, 3min en el parque)
                 tren.reiniciarTren();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
+    // NOTA TIEMPOS CONSIGNA: 5 minutos en parque = 2.5 segundos reales, muy poco
+    // tiempo de espera.
 }

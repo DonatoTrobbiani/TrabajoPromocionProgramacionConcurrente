@@ -22,6 +22,8 @@ public class GestorTiempo implements Runnable {
     private AtomicInteger hora;
     private AtomicInteger minutos;
     private Parque parque;
+    private int escalaTiempoMS = 500;
+
     private VentanaTiempo ventanaTiempo;
 
     /**
@@ -32,10 +34,10 @@ public class GestorTiempo implements Runnable {
      */
     public GestorTiempo(Parque parque) {
         this.hora = new AtomicInteger(8);
-        this.minutos = new AtomicInteger(50);
+        this.minutos = new AtomicInteger(40);
         this.parque = parque;
 
-        this.ventanaTiempo = new VentanaTiempo(hora, minutos);
+        this.ventanaTiempo = new VentanaTiempo(hora, minutos, this);
         this.ventanaTiempo.start();
     }
 
@@ -49,7 +51,7 @@ public class GestorTiempo implements Runnable {
     public void run() {
         try {
             while (true) {
-                Thread.sleep(500);
+                Thread.sleep(escalaTiempoMS);
                 minutos.incrementAndGet();
                 this.avanzaHora();// Avanza la hora si es necesario
                 this.avanzarDia();// Avanza el día si es necesario
@@ -146,5 +148,9 @@ public class GestorTiempo implements Runnable {
 
     public void setParque(Parque parque2) {
         this.parque = parque2;
+    }
+
+    public int getEscalaTiempoMS() {
+        return escalaTiempoMS;
     }
 }
