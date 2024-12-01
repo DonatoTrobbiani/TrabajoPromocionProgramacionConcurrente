@@ -91,8 +91,6 @@ public class Persona implements Runnable {
                 if (atracciones.isEmpty() || !parque.estanAbiertasAtracciones()) {
                     // 1.1. Si no quedan atracciones o estas cerraron,
                     // se queda un rato más en el parque
-                    System.out.println("[Persona] " + nombre
-                            + " se prepara para retirarse. Va a recorrer el parque por un rato.");
                     salida = true;
                 } else if (parque.estanAbiertasAtracciones()) {
                     // 1.1. Recorre un poco el parque
@@ -102,7 +100,7 @@ public class Persona implements Runnable {
                     Thread.sleep((int) Math.random() * 5000 + 5000); // (min 10min, max 20min)
 
                     // 2. Elige una actividad al azar
-                    // 2.1 Se asegura de no repetir actividades
+                    // 2.1 Se asegura de no repetir dos actividades seguidas
                     int atraccionActual;
                     do {
                         atraccionActual = random.nextInt(atracciones.size());
@@ -117,16 +115,23 @@ public class Persona implements Runnable {
                         System.out.println("[DEBUG] " + nombre + " terminó la actividad: "
                                 + atracciones.get(atraccionActual));
                         atracciones.remove(atraccionActual);
+                    } else {
+                        System.out.println("[DEBUG] " + nombre + " no pudo realizar la actividad: "
+                                + atracciones.get(atraccionActual));
                     }
                     atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
                 }
             }
         }
+        System.out.println("[Persona] " + nombre
+                + " se prepara para retirarse. Va a recorrer el parque por un rato.");
+        int periodoRecorrido;
         if (parque.getHora() < 22) {
-            Thread.sleep((int) Math.random() * 30000); // Máx una hora.
+            periodoRecorrido = (int) Math.random() * 30000 + 30000; // Máx 1 hora
         } else {
-            Thread.sleep((int) Math.random() * 15000); // Máx media hora.
+            periodoRecorrido = (int) Math.random() * 15000 + 15000; // Máx 30min
         }
+        Thread.sleep(periodoRecorrido);
         System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
     }
 

@@ -93,7 +93,7 @@ public class Parque {
 
         // Intercambia la ficha y espera.
         System.out.println(
-                "[JU] " + p.getNombre() + " entregó una " + ficha + " al encargado.");
+                "[JU] " + p.getNombre() + " entregó una ficha al encargado.");
         ficha = exchanger.exchange(ficha);
         p.agregarItem(exchanger.exchange(null));
 

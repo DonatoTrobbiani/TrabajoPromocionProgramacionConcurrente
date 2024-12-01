@@ -67,35 +67,43 @@ public class Comedor {
      */
     public boolean sentarseEnMesa(Persona p) {
         boolean exito = false; // Indica si la persona logró sentarse en la mesa.
-        int intentos = 0; // Cantidad de intentos de sentarse en la mesa.
-        while (!exito && intentos < 3) {
-            try {
+        try {
+            synchronized (personasEnMesa) {
                 // 1. Se agrega la persona a la mesa actual.
                 personasEnMesa.add(p);
                 System.out.println("[COM] " + p.getNombre() + " se ha sentado en la mesa.");
-                // 2. Se espera a que se complete la mesa.
-                mesasCyclicBarrier.await(5, TimeUnit.SECONDS);
-                exito = true;
-            } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
-                if (e instanceof TimeoutException) {
-                    // 2.1 Si se produce un TimeoutException, se indica que la persona se cansó de
-                    // esperar.
-                    System.out.println("[COM] " + p.getNombre() + " se cansó de esperar.");
-                } else if (e instanceof BrokenBarrierException) {
-                    // 2.2 Si se produce una BrokenBarrierException, se indica que la persona se
-                    // cansó de esperar.
-                    // Ocurre cuando un hilo que espera en la barrera es interrumpido.
-                    System.out.println("[COM] " + p.getNombre() + " se cansó de esperar.");
-                } else {
-                    e.printStackTrace();
-                }
-                intentos++;
-                mesasCyclicBarrier.reset();
+            }
+            // 2. Se espera a que se complete la mesa.
+            mesasCyclicBarrier.await(5, TimeUnit.SECONDS);
+            exito = true;
+        } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            if (e instanceof TimeoutException) {
+                // 2.1 Si se produce un TimeoutException, se indica que la persona se cansó de
+                // esperar.
+                System.out.println("[COM] " + p.getNombre() + " se cansó de esperar.");
+            } else if (e instanceof BrokenBarrierException) {
+                // 2.2 Si se produce una BrokenBarrierException, se indica que la persona se
+                // cansó de esperar.
+                // Ocurre cuando un hilo que espera en la barrera es interrumpido.
+                System.out.println("[COM] " + p.getNombre() + " se cansó de esperar.");
+            } else {
+                e.printStackTrace();
+            }
+            synchronized (personasEnMesa) {
                 // Se resetea la barrera (todos los hilos esperando en la barrera son
                 // liberados).
-                System.out.println("[COM] " + p.getNombre() + " está intentando nuevamente.");
-            } finally {
+                mesasCyclicBarrier.reset();
                 personasEnMesa.remove(p); // Se quita a la persona de la mesa.
+                if (personasEnMesa.isEmpty()) {
+                    mesasCyclicBarrier.reset();
+                }
+            }
+        } finally {
+            synchronized (personasEnMesa) {
+                personasEnMesa.remove(p); // Se quita a la persona de la mesa.
+                if (personasEnMesa.isEmpty()) {
+                    mesasCyclicBarrier.reset();
+                }
             }
         }
         return exito;
