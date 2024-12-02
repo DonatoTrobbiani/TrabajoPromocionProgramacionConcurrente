@@ -23,6 +23,7 @@ public class GestorTiempo implements Runnable {
     private AtomicInteger minutos;
     private Parque parque;
     private int escalaTiempoMS = 500;
+    private int indexPersonas;
 
     private VentanaTiempo ventanaTiempo;
 
@@ -30,12 +31,14 @@ public class GestorTiempo implements Runnable {
      * Constructor de la clase GestorTiempo.
      * Inicializa la hora en la que comenzará el ciclo del parque.
      * 
-     * @param parque Parque al que pertenece el gestor de tiempo.
+     * @param parque       Parque al que pertenece el gestor de tiempo.
+     * @param cantPersonas
      */
-    public GestorTiempo(Parque parque) {
+    public GestorTiempo(Parque parque, int cantPersonas) {
         this.hora = new AtomicInteger(8);
         this.minutos = new AtomicInteger(40);
         this.parque = parque;
+        this.indexPersonas = cantPersonas;
 
         this.ventanaTiempo = new VentanaTiempo(hora, minutos, this);
         this.ventanaTiempo.start();
@@ -50,9 +53,21 @@ public class GestorTiempo implements Runnable {
     @Override
     public void run() {
         try {
+            // Grupo inicial de Personas
+            for (int i = 0; i < indexPersonas; i++) {
+                Persona persona = new Persona(parque, "Persona" + i);
+                Thread hiloPersona = new Thread(persona);
+                hiloPersona.start();
+            }
+
             while (true) {
                 Thread.sleep(escalaTiempoMS);
                 minutos.incrementAndGet();
+                // Si es horario hábil, tiene una probabilidad del 5% de que aparezca una
+                // persona
+                if (hora.get() >= 9 && hora.get() <= 18) {
+                    this.iniciarPersonas();
+                }
                 this.avanzaHora();// Avanza la hora si es necesario
                 this.avanzarDia();// Avanza el día si es necesario
                 this.abrirParque();// Abre el parque si es necesario
@@ -61,8 +76,8 @@ public class GestorTiempo implements Runnable {
                 // System.out.println(hora + ":" + minutos); // Debug
             }
         } catch (Exception e) {
-            // TODO: Implementar manejo de excepción
-            Thread.currentThread().interrupt();
+            System.out.println("[GestorTiempo] Error en el hilo de tiempo:");
+            System.out.println(e.getLocalizedMessage());
         }
     }
 
@@ -73,6 +88,19 @@ public class GestorTiempo implements Runnable {
         if (minutos.get() == 60) {
             hora.incrementAndGet();
             minutos.set(0);
+        }
+    }
+
+    /**
+     * Método que inicia personas al azar.
+     */
+    private void iniciarPersonas() {
+        int probabilidad = (int) (Math.random() * 100);
+        if (probabilidad < 5) {
+            Persona persona = new Persona(parque, "Persona " + indexPersonas);
+            System.out.println("[DEBUG] Apareció una persona: " + persona.getNombre());
+            new Thread(persona).start();
+            indexPersonas++;
         }
     }
 

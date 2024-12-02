@@ -3,7 +3,6 @@ package Main;
 import java.util.Scanner;
 
 import App.Parque;
-import App.Persona;
 import Gestores.GestorTiempo;
 import RealidadVirtual.EspacioVirtual;
 
@@ -32,7 +31,7 @@ public class Main {
             System.out.println("Ingrese la cantidad de encargados de juegos (por defecto 3):");
             cantEncargadosJuegos = scanner.nextInt();
 
-            System.out.println("Ingrese la cantidad de personas (por defecto 5):");
+            System.out.println("Ingrese la cantidad de personas (por defecto 5) que ingresarán al parque por día:");
             cantPersonas = scanner.nextInt();
 
             System.out.println("Ingrese la cantidad de molinetes del parque (por defecto 3):");
@@ -42,26 +41,12 @@ public class Main {
 
         // Inicializa el parque
 
-        GestorTiempo gestorTiempo = new GestorTiempo(null);
+        GestorTiempo gestorTiempo = new GestorTiempo(null, cantPersonas);
         EspacioVirtual espacioVirtual = new EspacioVirtual(cantVR, cantVR * 2, cantVR, gestorTiempo);
         Parque parque = new Parque(cantMolinetes, gestorTiempo, cantEncargadosJuegos, espacioVirtual);
         gestorTiempo.setParque(parque);
         Thread hiloGestorTiempo = new Thread(gestorTiempo);
-        Thread[] hilos = new Thread[cantPersonas];
 
         hiloGestorTiempo.start();
-        for (int i = 0; i < cantPersonas; i++) {
-            hilos[i] = new Thread(new Persona(parque, "Persona " + i));
-            hilos[i].start();
-        }
-
-        try {
-            for (Thread thread : hilos) {
-                thread.join();
-            }
-            hiloGestorTiempo.interrupt();
-        } catch (InterruptedException e) {
-            System.out.println("Simulación terminada.");
-        }
     }
 }

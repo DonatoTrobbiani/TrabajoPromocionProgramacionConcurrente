@@ -22,17 +22,15 @@ import java.util.Random;
 public class Persona implements Runnable {
     private final Parque parque;
     private final String nombre;
-    private List<String> atracciones;
     private final Random random = new Random();// Para elegir atracciones al azar
     private final List<String> inventarioPremios = new ArrayList<>(); // Inventario para guardar premios
-    private int visitasComedor = 0;
+    // Atracciones son Comedor, Trenes, Realidad Virtual y Area de Premios.
+    private static final List<String> atracciones = List.of("Comedor", "Trenes", "Realidad Virtual", "Area de Premios",
+            "Shopping");
 
     public Persona(Parque parque, String nombrePersona) {
         this.parque = parque;
         this.nombre = nombrePersona;
-        // Atracciones son Comedor, Trenes, Realidad Virtual y Area de Premios.
-        this.atracciones = new ArrayList<>(
-                List.of("Comedor", "Trenes", "Realidad Virtual", "Area de Premios", "Shopping"));
     }
 
     /**
@@ -81,11 +79,10 @@ public class Persona implements Runnable {
      */
     private void recorrerParque() throws InterruptedException {
         boolean salida = false;
-        int atraccionAnterior = -1;
         while (!salida) {
             // 0. Evalúa si puede estar en el parque.
             // 1. Evalúa si quedan atracciones por visitar
-            if (atracciones.isEmpty() || !parque.estanAbiertasAtracciones()) {
+            if (!parque.estanAbiertasAtracciones()) {
                 // 1.1. Si no quedan atracciones o estas cerraron,
                 // se queda un rato más en el parque
                 System.out.println("[Persona] " + nombre
@@ -97,25 +94,13 @@ public class Persona implements Runnable {
             } else if (parque.estanAbiertasAtracciones()) {
                 // 1.1. Recorre un poco el parque
                 System.out
-                        .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades restantes: "
-                                + atracciones.toString());
-                Thread.sleep((int) Math.random() * 10000 + 5000); // (min 10min, max 30min)
+                        .println("[Persona] " + nombre + " está paseando por el parque.");
+                Thread.sleep((int) Math.random() * 10000 + 5000); // (5-15s reales, 10-30min en el parque)
 
                 // 2. Elige una actividad al azar
                 // 2.1 Se asegura de no repetir dos actividades seguidas
-                int atraccionActual;
-                do {
-                    atraccionActual = random.nextInt(atracciones.size());
-                } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
-
-                // 2.2 Intenta realizar la actividad
-                boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
-
-                // 2.3 Si fue exitoso, quita la actividad de la lista
-                if (exito) {
-                    atracciones.remove(atraccionActual);
-                }
-                atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
+                int atraccionActual = random.nextInt(atracciones.size());
+                hacerSiguienteActividad(atracciones.get(atraccionActual));
             }
         }
         System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
@@ -128,35 +113,26 @@ public class Persona implements Runnable {
      * @return boolean
      * @throws InterruptedException
      */
-    private boolean hacerSiguienteActividad(String atraccion) throws InterruptedException {
-        boolean respuesta = false;
+    private void hacerSiguienteActividad(String atraccion) throws InterruptedException {
         switch (atraccion) {
             case "Comedor":
-                visitasComedor++;
-                if (visitasComedor < 3) {
-                    respuesta = this.entrarAreaComedor();
-                } else {
-                    System.out
-                            .println("[COM] " + nombre + " intentó entrar al comedor 3 veces, no vuelve a intentarlo.");
-                }
-                respuesta = true;
+                this.entrarAreaComedor();
                 break;
             case "Trenes":
-                respuesta = this.entrarAreaTrenes();
+                this.entrarAreaTrenes();
                 break;
             case "Realidad Virtual":
-                respuesta = this.entrarAreaVR();
+                this.entrarAreaVR();
                 break;
             case "Area de Premios":
-                respuesta = this.entrarAreaJuegos();
+                this.entrarAreaJuegos();
                 break;
             case "Shopping":
-                respuesta = this.entrarShopping();
+                this.entrarShopping();
                 break;
             default:
                 throw new InterruptedException("Actividad no encontrada.");
         }
-        return respuesta;
     }
 
     /**
@@ -165,9 +141,9 @@ public class Persona implements Runnable {
      * @return boolean
      * @throws InterruptedException
      */
-    private boolean entrarAreaJuegos() throws InterruptedException {
+    private void entrarAreaJuegos() throws InterruptedException {
         System.out.println("[JU] " + nombre + " va a probar su suerte en los juegos.");
-        return parque.entrarAreaJuegos(this);
+        parque.entrarAreaJuegos(this);
     }
 
     /**
@@ -179,17 +155,16 @@ public class Persona implements Runnable {
      * @return boolean
      * @throws InterruptedException
      */
-    private boolean entrarShopping() throws InterruptedException {
+    private void entrarShopping() throws InterruptedException {
         System.out.println("[SH] " + nombre + " está comprando en el shopping.");
         String item = parque.comprarPrenda(this);
         if (item != null) {
-            Thread.sleep((int) (Math.random() * 5000) + 5000); // (5-10s reales, 10-20 min en el parque)
+            Thread.sleep((int) (Math.random() * 10000) + 10000); // (10-20s reales, 20-40min en el parque)
             System.out.println("[SH] " + nombre + " compró " + item + ".");
             Thread.sleep(2500); // (2.5s reales, 5min en el parque)
             this.agregarItem(item);
             System.out.println("[SH] " + nombre + " terminó de comprar en el shopping.");
         }
-        return item != null;
     }
 
     /**
@@ -201,7 +176,7 @@ public class Persona implements Runnable {
      * @return boolean
      * @throws InterruptedException
      */
-    private boolean entrarAreaVR() throws InterruptedException {
+    private void entrarAreaVR() throws InterruptedException {
         System.out.println("[VR] " + nombre + " quiere pobrar la realidad virtual.");
         boolean respuesta = parque.entrarRealidadVirtual(this);
         if (respuesta) {
@@ -211,7 +186,6 @@ public class Persona implements Runnable {
             Thread.sleep(2500);// (2.5s, 5min en el parque)
             parque.salirRealidadVirtual(this);
         }
-        return respuesta;
     }
 
     /**
@@ -223,7 +197,7 @@ public class Persona implements Runnable {
      * 
      * @throws InterruptedException
      */
-    private boolean entrarAreaComedor() throws InterruptedException {
+    private void entrarAreaComedor() throws InterruptedException {
         boolean respuesta = parque.entrarAreaComedor(this);
         if (respuesta) {
             System.out.println("[COM] " + nombre + " quiere comer algo.");
@@ -235,7 +209,6 @@ public class Persona implements Runnable {
                 parque.salirAreaComedor();
             }
         }
-        return respuesta;
     }
 
     /**
@@ -245,12 +218,11 @@ public class Persona implements Runnable {
      * @return boolean
      * @throws InterruptedException
      */
-    private boolean entrarAreaTrenes() throws InterruptedException {
+    private void entrarAreaTrenes() throws InterruptedException {
         boolean respuesta = parque.entrarAreaTrenes(this);
         if (respuesta) {
             System.out.println("[TR_P] " + nombre + " se bajó del tren.");
         }
-        return respuesta;
     }
 
     // * Getters y Setters
