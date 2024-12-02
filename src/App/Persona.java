@@ -84,55 +84,40 @@ public class Persona implements Runnable {
         int atraccionAnterior = -1;
         while (!salida) {
             // 0. Evalúa si puede estar en el parque.
-            if (!parque.estaAbiertoParque()) {
-                System.out.println("[Persona] " + nombre + " se va del parque...");
+            // 1. Evalúa si quedan atracciones por visitar
+            if (atracciones.isEmpty() || !parque.estanAbiertasAtracciones()) {
+                // 1.1. Si no quedan atracciones o estas cerraron,
+                // se queda un rato más en el parque
+                System.out.println("[Persona] " + nombre
+                        + " se prepara para retirarse. Va a recorrer el parque por un rato.");
+                int periodoRecorrido = (int) (Math.random() * 15000) + 15000;
+                // (15-30s reales, 30-60 min en el parque)
+                Thread.sleep(periodoRecorrido);
                 salida = true;
-            } else {
-                // 1. Evalúa si quedan atracciones por visitar
-                if (atracciones.isEmpty() || !parque.estanAbiertasAtracciones()) {
-                    // 1.1. Si no quedan atracciones o estas cerraron,
-                    // se queda un rato más en el parque
-                    salida = true;
-                } else if (parque.estanAbiertasAtracciones()) {
-                    // 1.1. Recorre un poco el parque
-                    System.out
-                            .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades restantes: "
-                                    + atracciones.toString());
-                    Thread.sleep((int) Math.random() * 10000 + 5000); // (min 10min, max 30min)
+            } else if (parque.estanAbiertasAtracciones()) {
+                // 1.1. Recorre un poco el parque
+                System.out
+                        .println("[Persona] " + nombre + " está paseando por el parque.\n Actividades restantes: "
+                                + atracciones.toString());
+                Thread.sleep((int) Math.random() * 10000 + 5000); // (min 10min, max 30min)
 
-                    // 2. Elige una actividad al azar
-                    // 2.1 Se asegura de no repetir dos actividades seguidas
-                    int atraccionActual;
-                    do {
-                        atraccionActual = random.nextInt(atracciones.size());
-                    } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
-                    System.out.println("[DEBUG] " + nombre + " elige: " + atracciones.get(atraccionActual).toString());
+                // 2. Elige una actividad al azar
+                // 2.1 Se asegura de no repetir dos actividades seguidas
+                int atraccionActual;
+                do {
+                    atraccionActual = random.nextInt(atracciones.size());
+                } while (atraccionActual == atraccionAnterior && atracciones.size() > 1);
 
-                    // 2.2 Intenta realizar la actividad
-                    boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
+                // 2.2 Intenta realizar la actividad
+                boolean exito = this.hacerSiguienteActividad(atracciones.get(atraccionActual));
 
-                    // 2.3 Si fue exitoso, quita la actividad de la lista
-                    if (exito) {
-                        System.out.println("[DEBUG] " + nombre + " terminó la actividad: "
-                                + atracciones.get(atraccionActual));
-                        atracciones.remove(atraccionActual);
-                    } else {
-                        System.out.println("[DEBUG] " + nombre + " no pudo realizar la actividad: "
-                                + atracciones.get(atraccionActual));
-                    }
-                    atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
+                // 2.3 Si fue exitoso, quita la actividad de la lista
+                if (exito) {
+                    atracciones.remove(atraccionActual);
                 }
+                atraccionAnterior = atraccionActual; // Actualiza la actividad anterior para no repetirla
             }
         }
-        System.out.println("[Persona] " + nombre
-                + " se prepara para retirarse. Va a recorrer el parque por un rato.");
-        int periodoRecorrido;
-        if (parque.getHora() < 22) {
-            periodoRecorrido = (int) (Math.random() * 15000) + 15000; // (15-30s reales, 30-60 min en el parque)
-        } else {
-            periodoRecorrido = (int) (Math.random() * 7500) + 7500; // (7.5-15s reales, 15-30 min en el parque)
-        }
-        Thread.sleep(periodoRecorrido);
         System.out.println("[Persona] " + nombre + " salió del parque. Se lleva: " + inventarioPremios.toString());
     }
 

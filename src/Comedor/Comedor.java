@@ -104,7 +104,7 @@ public class Comedor {
     }
 
     private void salirBarrera(Persona p) {
-        personasEnMesa.remove(0);// Se quita a la persona de la mesa.
+        personasEnMesa.remove(p);// Se quita a la persona de la mesa.
         if (personasEnMesa.isEmpty()) {
             mesasCyclicBarrier.reset();
         }

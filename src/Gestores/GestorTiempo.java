@@ -62,6 +62,7 @@ public class GestorTiempo implements Runnable {
             }
         } catch (Exception e) {
             // TODO: Implementar manejo de excepción
+            Thread.currentThread().interrupt();
         }
     }
 

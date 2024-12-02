@@ -63,16 +63,19 @@ public class Parque {
         return semaforoMolinetes;
     }
 
+    /**
+     * Método para adquirir un molinete.
+     * @throws InterruptedException
+     */
     public void entrarMolinete() throws InterruptedException {
         semaforoMolinetes.acquire();
     }
 
+    /**
+     * Método para liberar un molinete.
+     */
     public void salirMolinete() {
         semaforoMolinetes.release();
-    }
-
-    public boolean estaAbiertoParque() {
-        return gestorTiempo.getHora() >= 9 && gestorTiempo.getHora() < 23;
     }
 
     /**
